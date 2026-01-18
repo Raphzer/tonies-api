@@ -1,3 +1,4 @@
+import logging
 from typing import List
 import httpx
 
@@ -23,6 +24,8 @@ from .models import (
     User,
 )
 
+log = logging.getLogger(__name__)
+
 
 class TonieResources:
     """Handles fetching resources from the Tonies API."""
@@ -46,6 +49,7 @@ class TonieResources:
         Raises:
             TonieConnectionError: If there is a connection error.
         """
+        log.debug("Getting households.")
         try:
             response = await self._session.post(GRAPHQL_URL, json=GET_HOUSEHOLDS_QUERY)
             response.raise_for_status()
@@ -68,6 +72,7 @@ class TonieResources:
         Raises:
             TonieConnectionError: If there is a connection error.
         """
+        log.debug("Getting tonies overview.")
         try:
             response = await self._session.post(
                 GRAPHQL_URL, json=USER_TONIES_OVERVIEW_QUERY
@@ -91,6 +96,7 @@ class TonieResources:
         Raises:
             TonieConnectionError: If there is a connection error.
         """
+        log.debug("Getting household boxes.")
         try:
             response = await self._session.post(
                 GRAPHQL_URL, json=GET_HOUSEHOLDS_BOXES_QUERY
@@ -120,6 +126,7 @@ class TonieResources:
         Raises:
             TonieConnectionError: If there is a connection error.
         """
+        log.debug("Getting user details.")
         try:
             response = await self._session.post(
                 GRAPHQL_URL, json=GET_USER_DETAILS_QUERY
@@ -132,7 +139,7 @@ class TonieResources:
             raise TonieConnectionError from exc
         except Exception as e:
             # Broad exception to catch pydantic validation errors or other issues
-            raise TonieConnectionError(f"Failed to parse UserDetails data: {e}")
+            raise TonieConnectionError(f"Failed to parse User data: {e}")
 
     async def get_children(self, household_id: str) -> List[Child]:
         """
@@ -147,6 +154,7 @@ class TonieResources:
         Raises:
             TonieConnectionError: If there is a connection error.
         """
+        log.debug(f"Getting children for household {household_id}.")
         try:
             payload = {
                 "operationName": "GetChildren",
@@ -182,6 +190,7 @@ class TonieResources:
         Raises:
             TonieConnectionError: If there is a connection error.
         """
+        log.debug(f"Getting members for household {household_id}.")
         try:
             payload = {
                 "operationName": "GetHouseholdMembers",
@@ -217,6 +226,7 @@ class TonieResources:
         Raises:
             TonieConnectionError: If there is a connection error.
         """
+        log.debug(f"Getting details for tonie {tonie_id} in household {household_id}.")
         try:
             payload = {
                 "operationName": "ContentTonieDetails",

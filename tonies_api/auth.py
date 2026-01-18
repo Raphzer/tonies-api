@@ -1,11 +1,14 @@
+import logging
 from typing import Self
 from urllib.parse import parse_qs, urlparse
 
 import httpx
 from bs4 import BeautifulSoup
 
-from .const import CLIENT_ID, OAUTH_URL, REDIRECT_URI, SCOPE, TOKEN_PATH
+from .const import CLIENT_ID, OAUTH_URL, REDIRECT_URI, SCOPE, TOKEN_PATH, AUTH_BASE_URL
 from .exceptions import TonieAuthError
+
+log = logging.getLogger(__name__)
 
 
 class TonieAuth:
@@ -37,6 +40,7 @@ class TonieAuth:
         Raises:
             TonieAuthError: If login fails.
         """
+        log.debug("Starting authentication flow.")
         try:
             response = await self._session.get(OAUTH_URL)
             response.raise_for_status()
@@ -49,7 +53,7 @@ class TonieAuth:
             raise TonieAuthError("Could not find login form or action URL")
 
         action_url = form["action"]
-        print(action_url)
+        log.debug(f"Found login form action URL: {action_url}")
 
         data = {
             "username": self.username,
@@ -57,18 +61,18 @@ class TonieAuth:
         }
         try:
             response = await self._session.post(
-                action_url,
+                str(action_url),
                 data=data,
             )
-            response.raise_for_status()
+            # Don't raise for status here, as a 302 is expected on success
         except httpx.HTTPError as exc:
             raise TonieAuthError("Failed to submit login form") from exc
 
-        # 4. Handle the redirect and extract the 'code'
         if response.status_code == 302:
             redirect_url = response.headers.get("Location")
             if not redirect_url:
                 raise TonieAuthError("Login failed, no redirect URL found after form submission")
+            log.debug(f"Redirected to: {redirect_url}")
 
             parsed_redirect_url = urlparse(redirect_url)
             query_params = parse_qs(parsed_redirect_url.query)
@@ -76,9 +80,9 @@ class TonieAuth:
 
             if not code:
                 raise TonieAuthError(f"Login failed, no authorization code found in redirect URL: {redirect_url}")
+            log.debug(f"Extracted authorization code: {code[:10]}...")
 
-            # 5. Exchange the authorization code for tokens
-            token_url = f"{self._session.base_url}{TOKEN_PATH}"
+            token_url = f"{AUTH_BASE_URL}{TOKEN_PATH}"
             token_data = {
                 "grant_type": "authorization_code",
                 "client_id": CLIENT_ID,
@@ -90,7 +94,7 @@ class TonieAuth:
                 token_response = await self._session.post(token_url, data=token_data)
                 token_response.raise_for_status()
                 tokens = token_response.json()
-                
+
                 self.access_token = tokens.get("access_token")
                 self.refresh_token = tokens.get("refresh_token")
                 self.id_token = tokens.get("id_token")
@@ -98,17 +102,19 @@ class TonieAuth:
                 if not self.access_token:
                     raise TonieAuthError("Failed to retrieve access token from token endpoint")
 
+                log.debug("Successfully retrieved access token.")
                 return self
 
             except httpx.HTTPError as exc:
                 raise TonieAuthError("Failed to exchange authorization code for tokens") from exc
 
         else:
-            # If we don't get a 302, it's likely the credentials were bad.
-            # We can parse the response HTML to see if there's an error message.
             soup = BeautifulSoup(response.text, "html.parser")
             error_element = soup.find("span", id="kc-feedback-text")
             if error_element:
-                raise TonieAuthError(f"Login failed: {error_element.text.strip()}")
+                error_message = error_element.text.strip()
+                log.error(f"Login failed with message: {error_message}")
+                raise TonieAuthError(f"Login failed: {error_message}")
             else:
+                log.error("Login failed for an unknown reason.")
                 raise TonieAuthError("Login failed for an unknown reason")

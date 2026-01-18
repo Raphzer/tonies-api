@@ -21,21 +21,9 @@ async def main():
     try:
         async with TonieAPIClient(username, password) as client:
             print("Login successful!")
+            user = await client.tonies.get_user_details()
 
-            # Example: Get households
-            households = await client.tonies.get_households()
-            print("\nHouseholds:")
-            for household in households:
-                print(f"- Name: {household.get('name')}, ID: {household.get('id')}")
-
-            # Example: Get Tonies for each household
-            for household in households:
-                tonies = await client.tonies.get_tonies(household["id"])
-                print(f"\nTonies in household '{household.get('name')}':")
-                for tonie in tonies:
-                    print(f"- Name: {tonie.get('name')}, Model: {tonie.get('model')}, ID: {tonie.get('id')}")
-
-
+           
     except TonieAuthError as e:
         print(f"Authentication failed: {e}")
     except Exception as e:

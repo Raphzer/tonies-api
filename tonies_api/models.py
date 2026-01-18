@@ -1,5 +1,5 @@
 from typing import List, Optional, Union
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field
 
 
 class Toniebox(BaseModel):
@@ -11,8 +11,8 @@ class Toniebox(BaseModel):
     household: str
     household_id: str = Field(alias="householdId")
     id: str
-    image_url: HttpUrl = Field(alias="imageUrl")
-    front_image_url: HttpUrl = Field(alias="frontImageUrl")
+    image_url: str = Field(alias="imageUrl")
+    front_image_url: str = Field(alias="frontImageUrl")
     item_id: str = Field(alias="itemId")
     led_level: str = Field(alias="ledLevel")
     max_headphone_volume: int = Field(alias="maxHeadphoneVolume")
@@ -38,7 +38,7 @@ class User(BaseModel):
     accepted_terms_of_use: bool = Field(alias="acceptedTermsOfUse")
     any_public_content_tokens: bool = Field(alias="anyPublicContentTokens")
     country: str
-    creative_tonie_shop_url: HttpUrl = Field(alias="creativeTonieShopUrl")
+    creative_tonie_shop_url: str = Field(alias="creativeTonieShopUrl")
     email: str
     first_name: str = Field(alias="firstName")
     has_any_content_tonies: bool = Field(alias="hasAnyContentTonies")
@@ -52,7 +52,7 @@ class User(BaseModel):
     locale: str
     notification_count: int = Field(alias="notificationCount")
     owns_tunes: bool = Field(alias="ownsTunes")
-    profile_image: Optional[HttpUrl] = Field(alias="profileImage")
+    profile_image: str = Field(alias="profileImage")
     tracking: bool
     unicode_locale: str = Field(alias="unicodeLocale")
     uuid: str
@@ -84,14 +84,14 @@ class Household(BaseModel):
 
 # Models for UserToniesOverview
 class Chapter(BaseModel):
-    seconds: int
+    seconds: float
     title: str
     typename: str = Field(alias="__typename")
 
 
 class ContentInfo(BaseModel):
     chapters: List[Chapter]
-    seconds: int
+    seconds: float
     typename: str = Field(alias="__typename")
 
 
@@ -99,8 +99,8 @@ class Item(BaseModel):
     id: str
     content_info: ContentInfo = Field(alias="contentInfo")
     title: str
-    tonie_shop_url: Optional[HttpUrl] = Field(alias="tonieShopUrl")
-    thumbnail: Optional[HttpUrl]
+    tonie_shop_url: Optional[str] = Field(alias="tonieShopUrl")
+    thumbnail: Optional[str]
     sales_id: Optional[str] = Field(alias="salesId")
     typename: str = Field(alias="__typename")
 
@@ -110,7 +110,7 @@ class Item(BaseModel):
 
 class AssignedTonie(BaseModel):
     id: str
-    image_url: HttpUrl = Field(alias="imageUrl")
+    image_url: str = Field(alias="imageUrl")
     title: str
     typename: str = Field(alias="__typename")
 
@@ -143,12 +143,12 @@ class AssociatedContentToken(BaseModel):
     id: str
     token: str
     chapters: List[Chapter]
-    thumbnail: Optional[HttpUrl]
+    thumbnail: Optional[str]
     subtitle: Optional[str]
     title: str
     description: Optional[str]
     campaign: Optional[str]
-    expired: bool
+    expired: Optional[bool]
     authors: List[Author]
     typename: str = Field(alias="__typename")
 
@@ -156,10 +156,10 @@ class AssociatedContentToken(BaseModel):
 class CreativeTonieChapter(BaseModel):
     id: str
     title: str
-    file: Optional[HttpUrl]
-    seconds: int
+    file: Optional[str]
+    seconds: float
     transcoding: bool
-    thumbnail: Optional[HttpUrl]
+    thumbnail: Optional[str]
     type: Optional[str]
     typename: str = Field(alias="__typename")
 
@@ -168,9 +168,9 @@ class CreativeTonie(BaseModel):
     household: str
     id: str
     name: str
-    image_url: HttpUrl = Field(alias="imageUrl")
-    seconds_present: int = Field(alias="secondsPresent")
-    seconds_remaining: int = Field(alias="secondsRemaining")
+    image_url: str = Field(alias="imageUrl")
+    seconds_present: float = Field(alias="secondsPresent")
+    seconds_remaining: float = Field(alias="secondsRemaining")
     live: bool
     private: bool
     associated_content_tokens: List[AssociatedContentToken] = Field(
@@ -188,11 +188,11 @@ class CreativeTonie(BaseModel):
 class Disc(BaseModel):
     id: str
     title: str
-    disc_image_url: HttpUrl = Field(alias="discImageUrl")
-    top_image_url: HttpUrl = Field(alias="topImageUrl")
-    toniebox_image_url: HttpUrl = Field(alias="tonieboxImageUrl")
+    disc_image_url: str = Field(alias="discImageUrl")
+    top_image_url: str = Field(alias="topImageUrl")
+    toniebox_image_url: str = Field(alias="tonieboxImageUrl")
     household_id: str = Field(alias="householdId")
-    cover_image_url: HttpUrl = Field(alias="coverImageUrl")
+    cover_image_url: str = Field(alias="coverImageUrl")
     typename: str = Field(alias="__typename")
 
     class Config:
@@ -208,20 +208,20 @@ class Group(BaseModel):
 class Series(BaseModel):
     id: str
     name: str
-    group: List[Group]
+    group: Group
 
 
 class ContentTonie(BaseModel):
     household: str
     id: str
     title: str
-    seconds_present: int = Field(alias="secondsPresent")
-    image_url: HttpUrl = Field(alias="imageUrl")
-    cover_url: HttpUrl = Field(alias="coverUrl")
+    seconds_present: float = Field(alias="secondsPresent")
+    image_url: str = Field(alias="imageUrl")
+    cover_url: str = Field(alias="coverUrl")
     language_unicode: str = Field(alias="languageUnicode")
-    supported_languages: List[str] = Field(alias="supportedLanguages")
+    supported_languages: Optional[List[str]] = Field(alias="supportedLanguages")
     series: Series
-    tune: Tune
+    tune: Optional[Tune]
     freshness_check: FreshnessCheck = Field(alias="freshnessCheck")
     typename: str = Field(alias="__typename")
 
@@ -234,17 +234,14 @@ class HouseholdWithTonies(Household):
     creative_tonies: List[CreativeTonie] = Field(alias="creativeTonies")
     discs: List[Disc]
 
-    class Config:
-        populate_by_name = True
-
 
 # Models for GetChildren
 class TonieboxInChild(BaseModel):
     id: str
     name: str
-    image_url: HttpUrl = Field(alias="imageUrl")
+    image_url: str = Field(alias="imageUrl")
     features: List[str]
-    front_image_url: HttpUrl = Field(alias="frontImageUrl")
+    front_image_url: str = Field(alias="frontImageUrl")
     typename: str = Field(alias="__typename")
 
     class Config:
@@ -256,10 +253,10 @@ class Child(BaseModel):
     name: str
     birth_date: Optional[str] = Field(alias="birthDate")
     gender: Optional[str]
-    situations: List[str]
-    tonieboxes: List[TonieboxInChild]
-    taxonomies_preferences: List[str] = Field(alias="taxonomiesPreferences")
-    taxonomies_avoid: List[str] = Field(alias="taxonomiesAvoid")
+    situations: Optional[List[str]]
+    tonieboxes: Optional[List[TonieboxInChild]]
+    taxonomies_preferences: Optional[List[str]] = Field(alias="taxonomiesPreferences")
+    taxonomies_avoid: Optional[List[str]] = Field(alias="taxonomiesAvoid")
     typename: str = Field(alias="__typename")
 
     class Config:
@@ -270,7 +267,7 @@ class Child(BaseModel):
 class CreativeTonieInPermission(BaseModel):
     id: str
     household_id: str = Field(alias="householdId")
-    image_url: HttpUrl = Field(alias="imageUrl")
+    image_url: str = Field(alias="imageUrl")
     name: str
     typename: str = Field(alias="__typename")
 
@@ -297,7 +294,7 @@ class Member(BaseModel):
     is_self: bool = Field(alias="isSelf")
     last_name: str = Field(alias="lastName")
     mtype: str
-    profile_image: Optional[HttpUrl] = Field(alias="profileImage")
+    profile_image: Optional[str] = Field(alias="profileImage")
     permissions: List[Permission]
     typename: str = Field(alias="__typename")
 
@@ -320,7 +317,7 @@ class HouseholdMembersResponse(BaseModel):
 
 # Models for ContentTonieDetails
 class TuneItemContentInfo(BaseModel):
-    seconds: int
+    seconds: float
     typename: str = Field(alias="__typename")
 
 
@@ -345,8 +342,8 @@ class Genre(BaseModel):
 
 class MyTuneAssignedTonie(BaseModel):
     id: str
-    image_url: HttpUrl = Field(alias="imageUrl")
-    cover_url: HttpUrl = Field(alias="coverUrl")
+    image_url: str = Field(alias="imageUrl")
+    cover_url: str = Field(alias="coverUrl")
     title: str
     typename: str = Field(alias="__typename")
 
@@ -367,8 +364,8 @@ class MyTune(BaseModel):
 class OwnedTune(BaseModel):
     description: str
     id: str
-    tonie_shop_url: Optional[HttpUrl] = Field(alias="tonieShopUrl")
-    thumbnail: Optional[HttpUrl]
+    tonie_shop_url: Optional[str] = Field(alias="tonieShopUrl")
+    thumbnail: Optional[str]
     title: str
     exclusive: bool
     content_info: TuneItemContentInfo = Field(alias="contentInfo")
@@ -392,14 +389,14 @@ class ContentTonieDetailsChapter(BaseModel):
 class ContentTonieDetailsSeriesGroup(BaseModel):
     id: str
     name: str
-    thumbnail: Optional[HttpUrl]
+    thumbnail: Optional[str]
     typename: str = Field(alias="__typename")
 
 
 class ContentTonieDetailsSeries(BaseModel):
     id: str
     name: str
-    group: List[ContentTonieDetailsSeriesGroup]
+    group: ContentTonieDetailsSeriesGroup
     typename: str = Field(alias="__typename")
 
 
@@ -408,10 +405,10 @@ class ContentTonieDetails(BaseModel):
     id: str
     default_episode_id: str = Field(alias="defaultEpisodeId")
     title: str
-    tune: Tune
-    seconds_present: int = Field(alias="secondsPresent")
-    image_url: HttpUrl = Field(alias="imageUrl")
-    cover_url: HttpUrl = Field(alias="coverUrl")
+    tune: Optional[Tune]
+    seconds_present: float = Field(alias="secondsPresent")
+    image_url: str = Field(alias="imageUrl")
+    cover_url: str = Field(alias="coverUrl")
     description: str
     lock: bool
     chapters: List[ContentTonieDetailsChapter]

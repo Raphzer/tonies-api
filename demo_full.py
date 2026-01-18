@@ -189,6 +189,96 @@ async def main():
                     )
                 except ValueError as ve:
                     print(f"Caught expected error for invalid headphone volume: {ve}")
+
+                # Example: Set Toniebox name
+                print("\nSet Toniebox Name (REST):")
+                # Test with a valid name
+                valid_name = "My Awesome Toniebox"
+                try:
+                    print(
+                        f"Setting name for '{first_toniebox.name}' to '{valid_name}'..."
+                    )
+                    updated_toniebox = await client.tonies.set_toniebox_name(
+                        first_toniebox.household_id, first_toniebox.id, valid_name
+                    )
+                    print(f"Success! New Toniebox name: {updated_toniebox.name}")
+                except ValueError as ve:
+                    print(f"Error setting Toniebox name: {ve}")
+
+                # Test with an invalid name (empty string)
+                invalid_name = ""
+                try:
+                    print(
+                        f"Attempting to set invalid name for '{first_toniebox.name}' to '{invalid_name}'..."
+                    )
+                    await client.tonies.set_toniebox_name(
+                        first_toniebox.household_id, first_toniebox.id, invalid_name
+                    )
+                except ValueError as ve:
+                    print(f"Caught expected error for invalid Toniebox name: {ve}")
+
+                # Example: Set accelerometer for a Toniebox
+                print("\nSet Accelerometer (REST):")
+                # Test enabling the accelerometer
+                try:
+                    print(
+                        f"Enabling accelerometer for '{first_toniebox.name}'..."
+                    )
+                    updated_toniebox = await client.tonies.set_accelerometer(
+                        first_toniebox.household_id, first_toniebox.id, True
+                    )
+                    print(
+                        f"Success! Accelerometer enabled: {updated_toniebox.accelerometer_enabled}"
+                    )
+                except ValueError as ve:
+                    print(f"Error setting accelerometer: {ve}")
+
+                # Test disabling the accelerometer
+                try:
+                    print(
+                        f"Disabling accelerometer for '{first_toniebox.name}'..."
+                    )
+                    updated_toniebox = await client.tonies.set_accelerometer(
+                        first_toniebox.household_id, first_toniebox.id, False
+                    )
+                    print(
+                        f"Success! Accelerometer enabled: {updated_toniebox.accelerometer_enabled}"
+                    )
+                except ValueError as ve:
+                    print(f"Error setting accelerometer: {ve}")
+
+                # Example: Set tap direction for a Toniebox
+                print("\nSet Tap Direction (REST):")
+                # Test with a valid direction
+                valid_direction = "left"
+                try:
+                    print(
+                        f"Setting tap direction for '{first_toniebox.name}' to '{valid_direction}'..."
+                    )
+                    updated_toniebox = await client.tonies.set_tap_direction(
+                        first_toniebox.household_id,
+                        first_toniebox.id,
+                        valid_direction,
+                    )
+                    print(
+                        f"Success! New tap direction: {updated_toniebox.tap_direction}"
+                    )
+                except ValueError as ve:
+                    print(f"Error setting tap direction: {ve}")
+
+                # Test with an invalid direction
+                invalid_direction = "up"
+                try:
+                    print(
+                        f"Attempting to set invalid tap direction for '{first_toniebox.name}' to '{invalid_direction}'..."
+                    )
+                    await client.tonies.set_tap_direction(
+                        first_toniebox.household_id,
+                        first_toniebox.id,
+                        invalid_direction,
+                    )
+                except ValueError as ve:
+                    print(f"Caught expected error for invalid tap direction: {ve}")
             else:
                 print("No Tonieboxes found to test setting max volume.")
 

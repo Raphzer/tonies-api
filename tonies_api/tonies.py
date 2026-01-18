@@ -352,3 +352,107 @@ class TonieResources:
             raise TonieConnectionError from exc
         except Exception as e:
             raise TonieConnectionError(f"Failed to set LED brightness: {e}")
+
+    async def set_toniebox_name(
+        self, household_id: str, toniebox_id: str, name: str
+    ) -> Toniebox:
+        """
+        Set the name for a specific Toniebox.
+
+        Args:
+            household_id: The ID of the household.
+            toniebox_id: The ID of the Toniebox.
+            name: The desired name for the Toniebox.
+
+        Returns:
+            A Toniebox object with the updated information.
+
+        Raises:
+            TonieConnectionError: If there is a connection error.
+        """
+        if not isinstance(name, str) or not name:
+            raise ValueError("Toniebox name must be a non-empty string.")
+
+        log.debug(
+            f"Setting name for toniebox {toniebox_id} in household {household_id} to {name}."
+        )
+        try:
+            url = f"{API_BASE_URL}/households/{household_id}/tonieboxes/{toniebox_id}"
+            payload = {"name": name}
+            response = await self._session.patch(url, json=payload)
+            response.raise_for_status()
+            return Toniebox(**response.json())
+        except httpx.HTTPError as exc:
+            raise TonieConnectionError from exc
+        except Exception as e:
+            raise TonieConnectionError(f"Failed to set Toniebox name: {e}")
+
+    async def set_accelerometer(
+        self, household_id: str, toniebox_id: str, enabled: bool
+    ) -> Toniebox:
+        """
+        Enable or disable the accelerometer for a specific Toniebox.
+
+        Args:
+            household_id: The ID of the household.
+            toniebox_id: The ID of the Toniebox.
+            enabled: True to enable, False to disable.
+
+        Returns:
+            A Toniebox object with the updated information.
+
+        Raises:
+            ValueError: If enabled is not a boolean.
+            TonieConnectionError: If there is a connection error.
+        """
+        if not isinstance(enabled, bool):
+            raise ValueError("Enabled must be a boolean.")
+
+        log.debug(
+            f"Setting accelerometer for toniebox {toniebox_id} in household {household_id} to {enabled}."
+        )
+        try:
+            url = f"{API_BASE_URL}/households/{household_id}/tonieboxes/{toniebox_id}"
+            payload = {"accelerometerEnabled": enabled}
+            response = await self._session.patch(url, json=payload)
+            response.raise_for_status()
+            return Toniebox(**response.json())
+        except httpx.HTTPError as exc:
+            raise TonieConnectionError from exc
+        except Exception as e:
+            raise TonieConnectionError(f"Failed to set accelerometer: {e}")
+
+    async def set_tap_direction(
+        self, household_id: str, toniebox_id: str, direction: str
+    ) -> Toniebox:
+        """
+        Set the tap direction for a specific Toniebox.
+
+        Args:
+            household_id: The ID of the household.
+            toniebox_id: The ID of the Toniebox.
+            direction: The desired tap direction ('left' or 'right').
+
+        Returns:
+            A Toniebox object with the updated information.
+
+        Raises:
+            ValueError: If direction is not 'left' or 'right'.
+            TonieConnectionError: If there is a connection error.
+        """
+        if direction not in ["left", "right"]:
+            raise ValueError("Direction must be 'left' or 'right'.")
+
+        log.debug(
+            f"Setting tap direction for toniebox {toniebox_id} in household {household_id} to {direction}."
+        )
+        try:
+            url = f"{API_BASE_URL}/households/{household_id}/tonieboxes/{toniebox_id}"
+            payload = {"tapDirection": direction}
+            response = await self._session.patch(url, json=payload)
+            response.raise_for_status()
+            return Toniebox(**response.json())
+        except httpx.HTTPError as exc:
+            raise TonieConnectionError from exc
+        except Exception as e:
+            raise TonieConnectionError(f"Failed to set tap direction: {e}")

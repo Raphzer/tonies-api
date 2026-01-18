@@ -85,6 +85,15 @@ async def main():
                 except ValueError as ve:
                     print(f"Error setting volume: {ve}")
 
+                # Example: Set Toniebox name
+                try:
+                    updated_toniebox = await client.tonies.set_toniebox_name(
+                        first_toniebox.household_id, first_toniebox.id, "My Test Toniebox"
+                    )
+                    print(f"Success! New Toniebox name: {updated_toniebox.name}")
+                except ValueError as ve:
+                    print(f"Error setting Toniebox name: {ve}")
+
     except TonieAuthError as e:
         print(f"Authentication failed: {e}")
     except Exception as e:
@@ -110,6 +119,9 @@ The `TonieAPIClient` provides access to the `TonieResources` class via the `toni
 -   `set_max_volume(household_id: str, toniebox_id: str, max_volume: int) -> Toniebox`
 -   `set_led_brightness(household_id: str, toniebox_id: str, led_level: str) -> Toniebox`
 -   `set_max_headphone_volume(household_id: str, toniebox_id: str, max_headphone_volume: int) -> Toniebox`
+-   `set_toniebox_name(household_id: str, toniebox_id: str, name: str) -> Toniebox`
+-   `set_accelerometer(household_id: str, toniebox_id: str, enabled: bool) -> Toniebox`
+-   `set_tap_direction(household_id: str, toniebox_id: str, direction: str) -> Toniebox`
 
 All methods are asynchronous and should be awaited.
 

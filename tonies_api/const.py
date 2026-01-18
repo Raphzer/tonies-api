@@ -51,6 +51,19 @@ GET_HOUSEHOLDS_BOXES_QUERY = {
           features
           settingsApplied
           macAddress
+          bedtimeSchedules { 
+            id
+            name
+            enabled
+            sleepTime
+            wakeupTime
+            alarmEnabled
+            alarmMorningLight
+            alarmTone
+            alarmToneLabel
+            alarmVolume
+            days
+          }
         }
       }
     }""",

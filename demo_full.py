@@ -101,53 +101,8 @@ async def main():
             print("\nSet Max Volume (REST):")
             if tonieboxes:
                 first_toniebox = tonieboxes[0]
-                # Test with a valid volume
-                valid_volume = 71
-                try:
-                    print(
-                        f"Setting max volume for '{first_toniebox.name}' to {valid_volume}..."
-                    )
-                    updated_toniebox = await client.tonies.set_max_volume(
-                        first_toniebox.household_id, first_toniebox.id, valid_volume
-                    )
-                    print(
-                        f"Success! New max volume: {updated_toniebox.max_volume}"
-                    )
-                except ValueError as ve:
-                    print(f"Error setting volume: {ve}")
-
-                # Examples for tngSettings features
-                print("\nTesting tngSettings features (these will fail if not supported)...")
-                try:
-                    # Set lightring brightness
-                    updated_toniebox = await client.tonies.set_lightring_brightness(
-                        first_toniebox.household_id, first_toniebox.id, 75
-                    )
-                    print(f"Success! New lightring brightness: {updated_toniebox.lightring_brightness}")
-
-                    # Set bedtime max volume
-                    updated_toniebox = await client.tonies.set_bedtime_max_volume(
-                        first_toniebox.household_id, first_toniebox.id, 30
-                    )
-                    print(f"Success! New bedtime max volume: {updated_toniebox.bedtime_max_volume}")
-
-                    # Set bedtime headphone volume
-                    updated_toniebox = await client.tonies.set_bedtime_headphone_max_volume(
-                        first_toniebox.household_id, first_toniebox.id, 40
-                    )
-                    print(f"Success! New bedtime headphone volume: {updated_toniebox.bedtime_max_headphone_volume}")
-
-                    # Set bedtime lightring brightness
-                    updated_toniebox = await client.tonies.set_bedtime_lightring_brightness(
-                        first_toniebox.household_id, first_toniebox.id, 20
-                    )
-                    print(f"Success! New bedtime lightring brightness: {updated_toniebox.bedtime_lightring_brightness}")
-
-                except ValueError as ve:
-                    print(f"Caught expected error for tngSettings feature: {ve}")
-            else:
-                print("No Tonieboxes found to test setting max volume.")
-
+                print(f"Betimeschedules: {first_toniebox.bedtime_schedules}")
+ 
     except TonieAuthError as e:
         print(f"Authentication failed: {e}")
     except Exception as e:

@@ -17,7 +17,7 @@ class Toniebox(BaseModel):
     led_level: str = Field(alias="ledLevel")
     lightring_brightness: Optional[int] = Field(alias="lightringBrightness")
     bedtime_lightring_brightness: Optional[int] = Field(alias="bedtimeLightringBrightness")
-    bedtime_lightring_color: Optional[str] = Field(alias="bedtimeLightringColor")
+    bedtime_lightring_color: Optional[str] = Field(alias="bedtimeLightringColor")    
     max_headphone_volume: int = Field(alias="maxHeadphoneVolume")
     max_volume: int = Field(alias="maxVolume")
     bedtime_max_volume: Optional[int] = Field(alias="bedtimeMaxVolume")
@@ -28,9 +28,26 @@ class Toniebox(BaseModel):
     features: List[str]
     settings_applied: bool = Field(alias="settingsApplied")
     mac_address: str = Field(alias="macAddress")
+    bedtime_schedules: List[BetTimeSchedules] = Field(alias="bedtimeSchedules") 
 
     class Config:
         populate_by_name = True
+
+
+class BetTimeSchedules(BaseModel):
+    id: str
+    name: str
+    enabled: bool
+    sleep_time: str = Field(alias="sleepTime")
+    wakeup_time: str = Field(alias="wakeupTime")
+    alarm_enabled: bool = Field(alias="alarmEnabled")
+    alarm_morning_light: bool = Field(alias="alarmMorningLight")
+    alarm_tone: str = Field(alias="alarmTone")
+    alarm_tone_label: str = Field(alias="alarmToneLabel")
+    alarm_volume: int = Field(alias="alarmVolume")
+    days: List[str]
+
+
 
 
 class User(BaseModel):

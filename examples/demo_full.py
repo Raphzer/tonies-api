@@ -101,16 +101,32 @@ async def main():
             print("\nSet Max Volume (REST):")
             if tonieboxes:
                 first_toniebox = tonieboxes[0]
-                new_volume = 50
-                print(
-                    f"Setting max volume for '{first_toniebox.name}' to {new_volume}..."
-                )
-                updated_toniebox = await client.tonies.set_max_volume(
-                    first_toniebox.household_id, first_toniebox.id, new_volume
-                )
-                print(
-                    f"Success! New max volume: {updated_toniebox.max_volume}, (headphone: {updated_toniebox.max_headphone_volume})"
-                )
+                # Test with a valid volume
+                valid_volume = 75
+                try:
+                    print(
+                        f"Setting max volume for '{first_toniebox.name}' to {valid_volume}..."
+                    )
+                    updated_toniebox = await client.tonies.set_max_volume(
+                        first_toniebox.household_id, first_toniebox.id, valid_volume
+                    )
+                    print(
+                        f"Success! New max volume: {updated_toniebox.max_volume}, (headphone: {updated_toniebox.max_headphone_volume})"
+                    )
+                except ValueError as ve:
+                    print(f"Error setting volume: {ve}")
+
+                # Test with an invalid volume
+                invalid_volume = 60
+                try:
+                    print(
+                        f"Attempting to set invalid max volume for '{first_toniebox.name}' to {invalid_volume}..."
+                    )
+                    await client.tonies.set_max_volume(
+                        first_toniebox.household_id, first_toniebox.id, invalid_volume
+                    )
+                except ValueError as ve:
+                    print(f"Caught expected error for invalid volume: {ve}")
             else:
                 print("No Tonieboxes found to test setting max volume.")
 

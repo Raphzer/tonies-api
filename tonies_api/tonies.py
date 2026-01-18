@@ -256,14 +256,18 @@ class TonieResources:
         Args:
             household_id: The ID of the household.
             toniebox_id: The ID of the Toniebox.
-            max_volume: The desired maximum volume.
+            max_volume: The desired maximum volume (25, 50, 75, or 100).
 
         Returns:
             A Toniebox object with the updated information.
 
         Raises:
+            ValueError: If max_volume is not one of the allowed values.
             TonieConnectionError: If there is a connection error.
         """
+        if max_volume not in [25, 50, 75, 100]:
+            raise ValueError("Max volume must be 25, 50, 75, or 100.")
+
         log.debug(
             f"Setting max volume for toniebox {toniebox_id} in household {household_id} to {max_volume}."
         )
@@ -277,7 +281,7 @@ class TonieResources:
             raise TonieConnectionError from exc
         except Exception as e:
             raise TonieConnectionError(f"Failed to set max volume: {e}")
-
+        
     async def set_max_headphone_volume(
         self, household_id: str, toniebox_id: str, max_headphone_volume: int
     ) -> Toniebox:
@@ -287,14 +291,18 @@ class TonieResources:
         Args:
             household_id: The ID of the household.
             toniebox_id: The ID of the Toniebox.
-            max_headphone_volume: The desired maximum volume.
+            max_headphone_volume: The desired maximum volume (25, 50, 75, or 100).
 
         Returns:
             A Toniebox object with the updated information.
 
         Raises:
+            ValueError: If max_volume is not one of the allowed values.
             TonieConnectionError: If there is a connection error.
         """
+        if max_headphone_volume not in [25, 50, 75, 100]:
+            raise ValueError("Max volume must be 25, 50, 75, or 100.")
+
         log.debug(
             f"Setting max volume for toniebox {toniebox_id} in household {household_id} to {max_headphone_volume}."
         )

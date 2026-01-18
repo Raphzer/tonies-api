@@ -42,8 +42,10 @@ import asyncio
 import os
 
 from dotenv import load_dotenv
+
 from tonies_api.client import TonieAPIClient
 from tonies_api.exceptions import TonieAuthError
+
 
 async def main():
     """Run a test of the Tonies API."""
@@ -60,35 +62,54 @@ async def main():
         async with TonieAPIClient(username, password) as client:
             print("Login successful!")
 
-            # Get user details
-            user_details = await client.tonies.get_user_details()
-            print(f"Welcome, {user_details.me.first_name}!")
+            # Example: Get user details using GraphQL
+            user = await client.tonies.get_user_details()
+            print(f"Welcome, {user.first_name}!")
 
-            # Get households
+            # Example: Get households using GraphQL
             households = await client.tonies.get_households()
             for household in households:
                 print(f"Household: {household.name}")
+
+            # Example: Get Tonieboxes using GraphQL
+            tonieboxes = await client.tonies.get_households_boxes()
+            if tonieboxes:
+                first_toniebox = tonieboxes[0]
+                
+                # Example: Set max volume for a Toniebox
+                try:
+                    updated_toniebox = await client.tonies.set_max_volume(
+                        first_toniebox.household_id, first_toniebox.id, 75
+                    )
+                    print(f"Success! New max volume: {updated_toniebox.max_volume}")
+                except ValueError as ve:
+                    print(f"Error setting volume: {ve}")
 
     except TonieAuthError as e:
         print(f"Authentication failed: {e}")
     except Exception as e:
         print(f"An error occurred: {e}")
 
+
 if __name__ == "__main__":
     asyncio.run(main())
+
 ```
 
 ## API Reference
 
 The `TonieAPIClient` provides access to the `TonieResources` class via the `tonies` attribute. Here are some of the available methods:
 
--   `get_user_details() -> UserResponse`
+-   `get_user_details() -> User`
 -   `get_households() -> List[Household]`
 -   `get_households_boxes() -> List[Toniebox]`
 -   `get_tonies() -> List[HouseholdWithTonies]`
 -   `get_children(household_id: str) -> List[Child]`
 -   `get_household_members(household_id: str) -> HouseholdMembersResponse`
 -   `get_content_tonie_details(household_id: str, tonie_id: str) -> List[ContentTonieDetails]`
+-   `set_max_volume(household_id: str, toniebox_id: str, max_volume: int) -> Toniebox`
+-   `set_led_brightness(household_id: str, toniebox_id: str, led_level: str) -> Toniebox`
+-   `set_max_headphone_volume(household_id: str, toniebox_id: str, max_headphone_volume: int) -> Toniebox`
 
 All methods are asynchronous and should be awaited.
 

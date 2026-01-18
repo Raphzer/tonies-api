@@ -38,6 +38,11 @@ GET_HOUSEHOLDS_BOXES_QUERY = {
           frontImageUrl
           itemId
           ledLevel
+          lightringBrightness
+          bedtimeLightringBrightness
+          bedtimeLightringColor
+          bedtimeMaxVolume
+          bedtimeMaxHeadphoneVolume   
           maxHeadphoneVolume
           maxVolume
           name
@@ -46,9 +51,7 @@ GET_HOUSEHOLDS_BOXES_QUERY = {
           features
           settingsApplied
           macAddress
-          __typename
         }
-        __typename
       }
     }""",
 }

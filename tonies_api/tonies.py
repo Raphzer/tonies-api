@@ -565,7 +565,7 @@ class TonieResources:
         except Exception as e:
             raise TonieConnectionError(f"Failed to set bedtime max volume: {e}")
 
-    async def set_bedtime_headphone_volume(
+    async def set_bedtime_headphone_max_volume(
         self, household_id: str, toniebox_id: str, volume: int
     ) -> Toniebox:
         """

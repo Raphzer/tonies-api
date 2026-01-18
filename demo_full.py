@@ -100,7 +100,7 @@ async def main():
             # Example: Set max volume for a Toniebox
             print("\nSet Max Volume (REST):")
             if tonieboxes:
-                first_toniebox = tonieboxes[1]
+                first_toniebox = tonieboxes[0]
                 # Test with a valid volume
                 valid_volume = 71
                 try:
@@ -121,7 +121,7 @@ async def main():
                 try:
                     # Set lightring brightness
                     updated_toniebox = await client.tonies.set_lightring_brightness(
-                        first_toniebox.household_id, first_toniebox.id, 50
+                        first_toniebox.household_id, first_toniebox.id, 75
                     )
                     print(f"Success! New lightring brightness: {updated_toniebox.lightring_brightness}")
 
@@ -132,10 +132,10 @@ async def main():
                     print(f"Success! New bedtime max volume: {updated_toniebox.bedtime_max_volume}")
 
                     # Set bedtime headphone volume
-                    updated_toniebox = await client.tonies.set_bedtime_headphone_volume(
+                    updated_toniebox = await client.tonies.set_bedtime_headphone_max_volume(
                         first_toniebox.household_id, first_toniebox.id, 40
                     )
-                    print(f"Success! New bedtime headphone volume: {updated_toniebox.bedtime_headphone_volume}")
+                    print(f"Success! New bedtime headphone volume: {updated_toniebox.bedtime_max_headphone_volume}")
 
                     # Set bedtime lightring brightness
                     updated_toniebox = await client.tonies.set_bedtime_lightring_brightness(

@@ -203,7 +203,7 @@ class TonieResources:
             # The result is nested, so we need to extract it
             households = data.get("data", {}).get("households", [])
             if not households:
-                return HouseholdMembersResponse(memberships=[], invitations=[], __typename="")
+                return HouseholdMembersResponse(memberships=[], invitations=[])
             return HouseholdMembersResponse(**households[0])
         except httpx.HTTPError as exc:
             raise TonieConnectionError from exc

@@ -281,7 +281,8 @@ class TonieResources:
             raise TonieConnectionError from exc
         except Exception as e:
             raise TonieConnectionError(f"Failed to set max volume: {e}")
-        
+
+
     async def set_max_headphone_volume(
         self, household_id: str, toniebox_id: str, max_headphone_volume: int
     ) -> Toniebox:
@@ -297,14 +298,14 @@ class TonieResources:
             A Toniebox object with the updated information.
 
         Raises:
-            ValueError: If max_volume is not one of the allowed values.
+            ValueError: If max_headphone_volume is not one of the allowed values.
             TonieConnectionError: If there is a connection error.
         """
         if max_headphone_volume not in [25, 50, 75, 100]:
-            raise ValueError("Max volume must be 25, 50, 75, or 100.")
+            raise ValueError("Max headphone volume must be 25, 50, 75, or 100.")
 
         log.debug(
-            f"Setting max volume for toniebox {toniebox_id} in household {household_id} to {max_headphone_volume}."
+            f"Setting max headphone volume for toniebox {toniebox_id} in household {household_id} to {max_headphone_volume}."
         )
         try:
             url = f"{API_BASE_URL}/households/{household_id}/tonieboxes/{toniebox_id}"
@@ -315,4 +316,39 @@ class TonieResources:
         except httpx.HTTPError as exc:
             raise TonieConnectionError from exc
         except Exception as e:
-            raise TonieConnectionError(f"Failed to set max volume: {e}")
+            raise TonieConnectionError(f"Failed to set max headphone volume: {e}")
+        
+    async def set_led_brightness(
+        self, household_id: str, toniebox_id: str, led_level: str
+    ) -> Toniebox:
+        """
+        Set the LED brightness for a specific Toniebox.
+
+        Args:
+            household_id: The ID of the household.
+            toniebox_id: The ID of the Toniebox.
+            led_level: The desired LED level ('on', 'off', 'dimmed').
+
+        Returns:
+            A Toniebox object with the updated information.
+
+        Raises:
+            ValueError: If led_level is not one of the allowed values.
+            TonieConnectionError: If there is a connection error.
+        """
+        if led_level not in ["on", "off", "dimmed"]:
+            raise ValueError("LED level must be 'on', 'off', or 'dimmed'.")
+
+        log.debug(
+            f"Setting LED level for toniebox {toniebox_id} in household {household_id} to {led_level}."
+        )
+        try:
+            url = f"{API_BASE_URL}/households/{household_id}/tonieboxes/{toniebox_id}"
+            payload = {"ledLevel": led_level}
+            response = await self._session.patch(url, json=payload)
+            response.raise_for_status()
+            return Toniebox(**response.json())
+        except httpx.HTTPError as exc:
+            raise TonieConnectionError from exc
+        except Exception as e:
+            raise TonieConnectionError(f"Failed to set LED brightness: {e}")

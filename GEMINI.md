@@ -29,8 +29,7 @@ tonies_api/
 │   ├── const.py            # Constantes (URLs, requêtes GraphQL)
 │   ├── exceptions.py       # Exceptions personnalisées
 │   └── models.py           # Modèles de données Pydantic
-├── examples/
-│   └── demo_full.py        # Exemple d'utilisation complet
+├── demo_full.py        # Exemple d'utilisation complet
 ├── .env.example
 ├── .gitignore
 ├── README.md

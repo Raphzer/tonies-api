@@ -111,7 +111,7 @@ async def main():
                         first_toniebox.household_id, first_toniebox.id, valid_volume
                     )
                     print(
-                        f"Success! New max volume: {updated_toniebox.max_volume}, (headphone: {updated_toniebox.max_headphone_volume})"
+                        f"Success! New max volume: {updated_toniebox.max_volume}"
                     )
                 except ValueError as ve:
                     print(f"Error setting volume: {ve}")
@@ -127,6 +127,68 @@ async def main():
                     )
                 except ValueError as ve:
                     print(f"Caught expected error for invalid volume: {ve}")
+
+                # Example: Set LED brightness for a Toniebox
+                print("\nSet LED Brightness (REST):")
+                # Test with a valid LED level
+                valid_led_level = "dimmed"
+                try:
+                    print(
+                        f"Setting LED level for '{first_toniebox.name}' to '{valid_led_level}'..."
+                    )
+                    updated_toniebox = await client.tonies.set_led_brightness(
+                        first_toniebox.household_id, first_toniebox.id, valid_led_level
+                    )
+                    print(f"Success! New LED level: {updated_toniebox.led_level}")
+                except ValueError as ve:
+                    print(f"Error setting LED level: {ve}")
+
+                # Test with an invalid LED level
+                invalid_led_level = "bright"
+                try:
+                    print(
+                        f"Attempting to set invalid LED level for '{first_toniebox.name}' to '{invalid_led_level}'..."
+                    )
+                    await client.tonies.set_led_brightness(
+                        first_toniebox.household_id,
+                        first_toniebox.id,
+                        invalid_led_level,
+                    )
+                except ValueError as ve:
+                    print(f"Caught expected error for invalid LED level: {ve}")
+
+                # Example: Set max headphone volume for a Toniebox
+                print("\nSet Max Headphone Volume (REST):")
+                # Test with a valid headphone volume
+                valid_headphone_volume = 75
+                try:
+                    print(
+                        f"Setting max headphone volume for '{first_toniebox.name}' to {valid_headphone_volume}..."
+                    )
+                    updated_toniebox = await client.tonies.set_max_headphone_volume(
+                        first_toniebox.household_id,
+                        first_toniebox.id,
+                        valid_headphone_volume,
+                    )
+                    print(
+                        f"Success! New max headphone volume: {updated_toniebox.max_headphone_volume}"
+                    )
+                except ValueError as ve:
+                    print(f"Error setting headphone volume: {ve}")
+
+                # Test with an invalid headphone volume
+                invalid_headphone_volume = 60
+                try:
+                    print(
+                        f"Attempting to set invalid max headphone volume for '{first_toniebox.name}' to {invalid_headphone_volume}..."
+                    )
+                    await client.tonies.set_max_headphone_volume(
+                        first_toniebox.household_id,
+                        first_toniebox.id,
+                        invalid_headphone_volume,
+                    )
+                except ValueError as ve:
+                    print(f"Caught expected error for invalid headphone volume: {ve}")
             else:
                 print("No Tonieboxes found to test setting max volume.")
 

@@ -8,7 +8,7 @@ class Toniebox(BaseModel):
     """
 
     accelerometer_enabled: bool = Field(alias="accelerometerEnabled")
-    household: str
+    household: Optional[str] = None
     household_id: str = Field(alias="householdId")
     id: str
     image_url: str = Field(alias="imageUrl")
@@ -23,7 +23,6 @@ class Toniebox(BaseModel):
     features: List[str]
     settings_applied: bool = Field(alias="settingsApplied")
     mac_address: str = Field(alias="macAddress")
-    typename: str = Field(alias="__typename")
 
     class Config:
         populate_by_name = True
@@ -56,12 +55,10 @@ class User(BaseModel):
     tracking: bool
     unicode_locale: str = Field(alias="unicodeLocale")
     uuid: str
-    # typename: str = Field(alias="__typename") # This will be duplicated, so we take one
 
     # Fields from UserFlags
     region: str
     can_buy_tunes: bool = Field(alias="canBuyTunes")
-    typename: str = Field(alias="__typename")
 
     class Config:
         populate_by_name = True
@@ -86,13 +83,11 @@ class Household(BaseModel):
 class Chapter(BaseModel):
     seconds: float
     title: str
-    typename: str = Field(alias="__typename")
 
 
 class ContentInfo(BaseModel):
     chapters: List[Chapter]
     seconds: float
-    typename: str = Field(alias="__typename")
 
 
 class Item(BaseModel):
@@ -102,7 +97,6 @@ class Item(BaseModel):
     tonie_shop_url: Optional[str] = Field(alias="tonieShopUrl")
     thumbnail: Optional[str]
     sales_id: Optional[str] = Field(alias="salesId")
-    typename: str = Field(alias="__typename")
 
     class Config:
         populate_by_name = True
@@ -112,7 +106,6 @@ class AssignedTonie(BaseModel):
     id: str
     image_url: str = Field(alias="imageUrl")
     title: str
-    typename: str = Field(alias="__typename")
 
     class Config:
         populate_by_name = True
@@ -122,7 +115,6 @@ class Tune(BaseModel):
     id: str
     assigned_tonies: List[AssignedTonie] = Field(alias="assignedTonies")
     item: Item
-    typename: str = Field(alias="__typename")
 
     class Config:
         populate_by_name = True
@@ -131,12 +123,12 @@ class Tune(BaseModel):
 class FreshnessCheck(BaseModel):
     manual: bool
     automatic: bool
-    typename: str = Field(alias="__typename")
+
 
 
 class Author(BaseModel):
     name: str
-    typename: str = Field(alias="__typename")
+
 
 
 class AssociatedContentToken(BaseModel):
@@ -150,7 +142,7 @@ class AssociatedContentToken(BaseModel):
     campaign: Optional[str]
     expired: Optional[bool]
     authors: List[Author]
-    typename: str = Field(alias="__typename")
+
 
 
 class CreativeTonieChapter(BaseModel):
@@ -161,7 +153,7 @@ class CreativeTonieChapter(BaseModel):
     transcoding: bool
     thumbnail: Optional[str]
     type: Optional[str]
-    typename: str = Field(alias="__typename")
+
 
 
 class CreativeTonie(BaseModel):
@@ -179,7 +171,7 @@ class CreativeTonie(BaseModel):
     chapters: List[CreativeTonieChapter]
     freshness_check: FreshnessCheck = Field(alias="freshnessCheck")
     tune: Optional[Tune] = None
-    typename: str = Field(alias="__typename")
+
 
     class Config:
         populate_by_name = True
@@ -193,7 +185,7 @@ class Disc(BaseModel):
     toniebox_image_url: str = Field(alias="tonieboxImageUrl")
     household_id: str = Field(alias="householdId")
     cover_image_url: str = Field(alias="coverImageUrl")
-    typename: str = Field(alias="__typename")
+
 
     class Config:
         populate_by_name = True
@@ -202,7 +194,7 @@ class Disc(BaseModel):
 class Group(BaseModel):
     id: str
     name: str
-    typename: str = Field(alias="__typename")
+
 
 
 class Series(BaseModel):
@@ -223,7 +215,7 @@ class ContentTonie(BaseModel):
     series: Series
     tune: Optional[Tune]
     freshness_check: FreshnessCheck = Field(alias="freshnessCheck")
-    typename: str = Field(alias="__typename")
+
 
     class Config:
         populate_by_name = True
@@ -242,7 +234,7 @@ class TonieboxInChild(BaseModel):
     image_url: str = Field(alias="imageUrl")
     features: List[str]
     front_image_url: str = Field(alias="frontImageUrl")
-    typename: str = Field(alias="__typename")
+
 
     class Config:
         populate_by_name = True
@@ -257,7 +249,7 @@ class Child(BaseModel):
     tonieboxes: Optional[List[TonieboxInChild]]
     taxonomies_preferences: Optional[List[str]] = Field(alias="taxonomiesPreferences")
     taxonomies_avoid: Optional[List[str]] = Field(alias="taxonomiesAvoid")
-    typename: str = Field(alias="__typename")
+
 
     class Config:
         populate_by_name = True
@@ -269,7 +261,7 @@ class CreativeTonieInPermission(BaseModel):
     household_id: str = Field(alias="householdId")
     image_url: str = Field(alias="imageUrl")
     name: str
-    typename: str = Field(alias="__typename")
+
 
     class Config:
         populate_by_name = True
@@ -278,7 +270,7 @@ class CreativeTonieInPermission(BaseModel):
 class Permission(BaseModel):
     creative_tonie: CreativeTonieInPermission = Field(alias="creativeTonie")
     permission: str
-    typename: str = Field(alias="__typename")
+
 
     class Config:
         populate_by_name = True
@@ -296,7 +288,7 @@ class Member(BaseModel):
     mtype: str
     profile_image: Optional[str] = Field(alias="profileImage")
     permissions: List[Permission]
-    typename: str = Field(alias="__typename")
+
 
     class Config:
         populate_by_name = True
@@ -306,25 +298,25 @@ class Invitation(BaseModel):
     email: str
     id: str
     itype: str
-    typename: str = Field(alias="__typename")
+
 
 
 class HouseholdMembersResponse(BaseModel):
     memberships: List[Member]
     invitations: List[Invitation]
-    typename: str = Field(alias="__typename")
+
 
 
 # Models for ContentTonieDetails
 class TuneItemContentInfo(BaseModel):
     seconds: float
-    typename: str = Field(alias="__typename")
+
 
 
 class TuneItemSeriesGroup(BaseModel):
     id: str
     name: str
-    typename: str = Field(alias="__typename")
+
 
 
 class TuneItemSeries(BaseModel):
@@ -332,12 +324,12 @@ class TuneItemSeries(BaseModel):
     name: str
     group: TuneItemSeriesGroup
     slug: str
-    typename: str = Field(alias="__typename")
+
 
 
 class Genre(BaseModel):
     key: str
-    typename: str = Field(alias="__typename")
+
 
 
 class MyTuneAssignedTonie(BaseModel):
@@ -345,7 +337,7 @@ class MyTuneAssignedTonie(BaseModel):
     image_url: str = Field(alias="imageUrl")
     cover_url: str = Field(alias="coverUrl")
     title: str
-    typename: str = Field(alias="__typename")
+
 
     class Config:
         populate_by_name = True
@@ -355,7 +347,7 @@ class MyTune(BaseModel):
     id: str
     assign_count_remaining: int = Field(alias="assignCountRemaining")
     assigned_tonies: List[MyTuneAssignedTonie] = Field(alias="assignedTonies")
-    typename: str = Field(alias="__typename")
+
 
     class Config:
         populate_by_name = True
@@ -375,7 +367,7 @@ class OwnedTune(BaseModel):
     language_unicode: str = Field(alias="languageUnicode")
     min_age: int = Field(alias="minAge")
     my_tune: MyTune = Field(alias="myTune")
-    typename: str = Field(alias="__typename")
+
 
     class Config:
         populate_by_name = True
@@ -383,21 +375,21 @@ class OwnedTune(BaseModel):
 
 class ContentTonieDetailsChapter(BaseModel):
     title: str
-    typename: str = Field(alias="__typename")
+
 
 
 class ContentTonieDetailsSeriesGroup(BaseModel):
     id: str
     name: str
     thumbnail: Optional[str]
-    typename: str = Field(alias="__typename")
+
 
 
 class ContentTonieDetailsSeries(BaseModel):
     id: str
     name: str
     group: ContentTonieDetailsSeriesGroup
-    typename: str = Field(alias="__typename")
+
 
 
 class ContentTonieDetails(BaseModel):
@@ -414,7 +406,7 @@ class ContentTonieDetails(BaseModel):
     chapters: List[ContentTonieDetailsChapter]
     series: ContentTonieDetailsSeries
     owned_tunes: List[OwnedTune] = Field(alias="ownedTunes")
-    typename: str = Field(alias="__typename")
+
 
     class Config:
         populate_by_name = True

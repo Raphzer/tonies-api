@@ -97,6 +97,23 @@ async def main():
                 else:
                     print("Could not fetch tonie details.")
 
+            # Example: Set max volume for a Toniebox
+            print("\nSet Max Volume (REST):")
+            if tonieboxes:
+                first_toniebox = tonieboxes[0]
+                new_volume = 50
+                print(
+                    f"Setting max volume for '{first_toniebox.name}' to {new_volume}..."
+                )
+                updated_toniebox = await client.tonies.set_max_volume(
+                    first_toniebox.household_id, first_toniebox.id, new_volume
+                )
+                print(
+                    f"Success! New max volume: {updated_toniebox.max_volume}, (headphone: {updated_toniebox.max_headphone_volume})"
+                )
+            else:
+                print("No Tonieboxes found to test setting max volume.")
+
     except TonieAuthError as e:
         print(f"Authentication failed: {e}")
     except Exception as e:

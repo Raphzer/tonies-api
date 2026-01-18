@@ -203,7 +203,7 @@ class TonieResources:
             # The result is nested, so we need to extract it
             households = data.get("data", {}).get("households", [])
             if not households:
-                return HouseholdMembersResponse(memberships=[], invitations=[], typename="")
+                return HouseholdMembersResponse(memberships=[], invitations=[], __typename="")
             return HouseholdMembersResponse(**households[0])
         except httpx.HTTPError as exc:
             raise TonieConnectionError from exc
@@ -246,3 +246,65 @@ class TonieResources:
             raise TonieConnectionError from exc
         except Exception as e:
             raise TonieConnectionError(f"Failed to parse ContentTonieDetails data: {e}")
+
+    async def set_max_volume(
+        self, household_id: str, toniebox_id: str, max_volume: int
+    ) -> Toniebox:
+        """
+        Set the maximum volume for a specific Toniebox.
+
+        Args:
+            household_id: The ID of the household.
+            toniebox_id: The ID of the Toniebox.
+            max_volume: The desired maximum volume.
+
+        Returns:
+            A Toniebox object with the updated information.
+
+        Raises:
+            TonieConnectionError: If there is a connection error.
+        """
+        log.debug(
+            f"Setting max volume for toniebox {toniebox_id} in household {household_id} to {max_volume}."
+        )
+        try:
+            url = f"{API_BASE_URL}/households/{household_id}/tonieboxes/{toniebox_id}"
+            payload = {"maxVolume": max_volume}
+            response = await self._session.patch(url, json=payload)
+            response.raise_for_status()
+            return Toniebox(**response.json())
+        except httpx.HTTPError as exc:
+            raise TonieConnectionError from exc
+        except Exception as e:
+            raise TonieConnectionError(f"Failed to set max volume: {e}")
+
+    async def set_max_headphone_volume(
+        self, household_id: str, toniebox_id: str, max_headphone_volume: int
+    ) -> Toniebox:
+        """
+        Set the maximum headphone volume for a specific Toniebox.
+
+        Args:
+            household_id: The ID of the household.
+            toniebox_id: The ID of the Toniebox.
+            max_headphone_volume: The desired maximum volume.
+
+        Returns:
+            A Toniebox object with the updated information.
+
+        Raises:
+            TonieConnectionError: If there is a connection error.
+        """
+        log.debug(
+            f"Setting max volume for toniebox {toniebox_id} in household {household_id} to {max_headphone_volume}."
+        )
+        try:
+            url = f"{API_BASE_URL}/households/{household_id}/tonieboxes/{toniebox_id}"
+            payload = {"maxHeadphoneVolume": max_headphone_volume}
+            response = await self._session.patch(url, json=payload)
+            response.raise_for_status()
+            return Toniebox(**response.json())
+        except httpx.HTTPError as exc:
+            raise TonieConnectionError from exc
+        except Exception as e:
+            raise TonieConnectionError(f"Failed to set max volume: {e}")

@@ -247,6 +247,27 @@ class TonieResources:
         except Exception as e:
             raise TonieConnectionError(f"Failed to parse ContentTonieDetails data: {e}")
 
+    async def _get_toniebox(self, toniebox_id: str) -> Toniebox:
+        """
+        Get a specific Toniebox by its ID.
+
+        Note: This is inefficient as it fetches all tonieboxes.
+
+        Args:
+            toniebox_id: The ID of the Toniebox.
+
+        Returns:
+            The Toniebox object.
+
+        Raises:
+            ValueError: If the Toniebox is not found.
+        """
+        tonieboxes = await self.get_households_boxes()
+        for toniebox in tonieboxes:
+            if toniebox.id == toniebox_id:
+                return toniebox
+        raise ValueError(f"Toniebox with ID {toniebox_id} not found.")
+
     async def set_max_volume(
         self, household_id: str, toniebox_id: str, max_volume: int
     ) -> Toniebox:
@@ -256,7 +277,7 @@ class TonieResources:
         Args:
             household_id: The ID of the household.
             toniebox_id: The ID of the Toniebox.
-            max_volume: The desired maximum volume (25, 50, 75, or 100).
+            max_volume: The desired maximum volume.
 
         Returns:
             A Toniebox object with the updated information.
@@ -265,8 +286,13 @@ class TonieResources:
             ValueError: If max_volume is not one of the allowed values.
             TonieConnectionError: If there is a connection error.
         """
-        if max_volume not in [25, 50, 75, 100]:
-            raise ValueError("Max volume must be 25, 50, 75, or 100.")
+        toniebox = await self._get_toniebox(toniebox_id)
+        if "tngSettings" in toniebox.features:
+            if not 25 <= max_volume <= 100:
+                raise ValueError("Max volume must be between 25 and 100 for this Toniebox.")
+        else:
+            if max_volume not in [25, 50, 75, 100]:
+                raise ValueError("Max volume must be 25, 50, 75, or 100 for this Toniebox.")
 
         log.debug(
             f"Setting max volume for toniebox {toniebox_id} in household {household_id} to {max_volume}."
@@ -282,7 +308,6 @@ class TonieResources:
         except Exception as e:
             raise TonieConnectionError(f"Failed to set max volume: {e}")
 
-
     async def set_max_headphone_volume(
         self, household_id: str, toniebox_id: str, max_headphone_volume: int
     ) -> Toniebox:
@@ -292,7 +317,7 @@ class TonieResources:
         Args:
             household_id: The ID of the household.
             toniebox_id: The ID of the Toniebox.
-            max_headphone_volume: The desired maximum volume (25, 50, 75, or 100).
+            max_headphone_volume: The desired maximum volume.
 
         Returns:
             A Toniebox object with the updated information.
@@ -301,8 +326,13 @@ class TonieResources:
             ValueError: If max_headphone_volume is not one of the allowed values.
             TonieConnectionError: If there is a connection error.
         """
-        if max_headphone_volume not in [25, 50, 75, 100]:
-            raise ValueError("Max headphone volume must be 25, 50, 75, or 100.")
+        toniebox = await self._get_toniebox(toniebox_id)
+        if "tngSettings" in toniebox.features:
+            if not 25 <= max_headphone_volume <= 100:
+                raise ValueError("Max headphone volume must be between 25 and 100 for this Toniebox.")
+        else:
+            if max_headphone_volume not in [25, 50, 75, 100]:
+                raise ValueError("Max headphone volume must be 25, 50, 75, or 100 for this Toniebox.")
 
         log.debug(
             f"Setting max headphone volume for toniebox {toniebox_id} in household {household_id} to {max_headphone_volume}."
@@ -456,3 +486,159 @@ class TonieResources:
             raise TonieConnectionError from exc
         except Exception as e:
             raise TonieConnectionError(f"Failed to set tap direction: {e}")
+
+    async def set_lightring_brightness(
+        self, household_id: str, toniebox_id: str, brightness: int
+    ) -> Toniebox:
+        """
+        Set the lightring brightness for a specific Toniebox.
+        This feature is only available for Tonieboxes with 'tngSettings'.
+
+        Args:
+            household_id: The ID of the household.
+            toniebox_id: The ID of the Toniebox.
+            brightness: The desired brightness (0-100).
+
+        Returns:
+            A Toniebox object with the updated information.
+
+        Raises:
+            ValueError: If the Toniebox does not support this feature or the value is invalid.
+            TonieConnectionError: If there is a connection error.
+        """
+        toniebox = await self._get_toniebox(toniebox_id)
+        if "tngSettings" not in toniebox.features:
+            raise ValueError("This Toniebox does not support setting lightring brightness.")
+        if not 0 <= brightness <= 100:
+            raise ValueError("Brightness must be between 0 and 100.")
+
+        log.debug(
+            f"Setting lightring brightness for toniebox {toniebox_id} to {brightness}."
+        )
+        try:
+            url = f"{API_BASE_URL}/households/{household_id}/tonieboxes/{toniebox_id}"
+            payload = {"lightringBrightness": brightness}
+            response = await self._session.patch(url, json=payload)
+            response.raise_for_status()
+            return Toniebox(**response.json())
+        except httpx.HTTPError as exc:
+            raise TonieConnectionError from exc
+        except Exception as e:
+            raise TonieConnectionError(f"Failed to set lightring brightness: {e}")
+
+    async def set_bedtime_max_volume(
+        self, household_id: str, toniebox_id: str, volume: int
+    ) -> Toniebox:
+        """
+        Set the bedtime max volume for a specific Toniebox.
+        This feature is only available for Tonieboxes with 'tngSettings'.
+
+        Args:
+            household_id: The ID of the household.
+            toniebox_id: The ID of the Toniebox.
+            volume: The desired bedtime max volume (0-100).
+
+        Returns:
+            A Toniebox object with the updated information.
+
+        Raises:
+            ValueError: If the Toniebox does not support this feature or the value is invalid.
+            TonieConnectionError: If there is a connection error.
+        """
+        toniebox = await self._get_toniebox(toniebox_id)
+        if "tngSettings" not in toniebox.features:
+            raise ValueError("This Toniebox does not support setting bedtime max volume.")
+        if not 0 <= volume <= 100:
+            raise ValueError("Bedtime max volume must be between 0 and 100.")
+
+        log.debug(
+            f"Setting bedtime max volume for toniebox {toniebox_id} to {volume}."
+        )
+        try:
+            url = f"{API_BASE_URL}/households/{household_id}/tonieboxes/{toniebox_id}"
+            payload = {"bedtimeMaxVolume": volume}
+            response = await self._session.patch(url, json=payload)
+            response.raise_for_status()
+            return Toniebox(**response.json())
+        except httpx.HTTPError as exc:
+            raise TonieConnectionError from exc
+        except Exception as e:
+            raise TonieConnectionError(f"Failed to set bedtime max volume: {e}")
+
+    async def set_bedtime_headphone_volume(
+        self, household_id: str, toniebox_id: str, volume: int
+    ) -> Toniebox:
+        """
+        Set the bedtime headphone volume for a specific Toniebox.
+        This feature is only available for Tonieboxes with 'tngSettings'.
+
+        Args:
+            household_id: The ID of the household.
+            toniebox_id: The ID of the Toniebox.
+            volume: The desired bedtime headphone volume (25-100).
+
+        Returns:
+            A Toniebox object with the updated information.
+
+        Raises:
+            ValueError: If the Toniebox does not support this feature or the value is invalid.
+            TonieConnectionError: If there is a connection error.
+        """
+        toniebox = await self._get_toniebox(toniebox_id)
+        if "tngSettings" not in toniebox.features:
+            raise ValueError("This Toniebox does not support setting bedtime headphone volume.")
+        if not 25 <= volume <= 100:
+            raise ValueError("Bedtime headphone volume must be between 25 and 100.")
+
+        log.debug(
+            f"Setting bedtime headphone volume for toniebox {toniebox_id} to {volume}."
+        )
+        try:
+            url = f"{API_BASE_URL}/households/{household_id}/tonieboxes/{toniebox_id}"
+            payload = {"bedtimeMaxHeadphoneVolume": volume}
+            response = await self._session.patch(url, json=payload)
+            response.raise_for_status()
+            return Toniebox(**response.json())
+        except httpx.HTTPError as exc:
+            raise TonieConnectionError from exc
+        except Exception as e:
+            raise TonieConnectionError(f"Failed to set bedtime headphone volume: {e}")
+
+    async def set_bedtime_lightring_brightness(
+        self, household_id: str, toniebox_id: str, brightness: int
+    ) -> Toniebox:
+        """
+        Set the bedtime lightring brightness for a specific Toniebox.
+        This feature is only available for Tonieboxes with 'tngSettings'.
+
+        Args:
+            household_id: The ID of the household.
+            toniebox_id: The ID of the Toniebox.
+            brightness: The desired bedtime lightring brightness (0-100).
+
+        Returns:
+            A Toniebox object with the updated information.
+
+        Raises:
+            ValueError: If the Toniebox does not support this feature or the value is invalid.
+            TonieConnectionError: If there is a connection error.
+        """
+        toniebox = await self._get_toniebox(toniebox_id)
+        if "tngSettings" not in toniebox.features:
+            raise ValueError("This Toniebox does not support setting bedtime lightring brightness.")
+        if not 0 <= brightness <= 100:
+            raise ValueError("Bedtime lightring brightness must be between 0 and 100.")
+
+        log.debug(
+            f"Setting bedtime lightring brightness for toniebox {toniebox_id} to {brightness}."
+        )
+        try:
+            url = f"{API_BASE_URL}/households/{household_id}/tonieboxes/{toniebox_id}"
+            payload = {"bedtimeLightringBrightness": brightness}
+            response = await self._session.patch(url, json=payload)
+            response.raise_for_status()
+            return Toniebox(**response.json())
+        except httpx.HTTPError as exc:
+            raise TonieConnectionError from exc
+        except Exception as e:
+            raise TonieConnectionError(f"Failed to set bedtime lightring brightness: {e}")

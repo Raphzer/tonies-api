@@ -15,8 +15,13 @@ class Toniebox(BaseModel):
     front_image_url: str = Field(alias="frontImageUrl")
     item_id: str = Field(alias="itemId")
     led_level: str = Field(alias="ledLevel")
+    lightring_brightness: Optional[int] = Field(alias="lightringBrightness")
+    bedtime_lightring_brightness: Optional[int] = Field(alias="bedtimeLightringBrightness")
+    bedtime_lightring_color: Optional[str] = Field(alias="bedtimeLightringColor")
     max_headphone_volume: int = Field(alias="maxHeadphoneVolume")
     max_volume: int = Field(alias="maxVolume")
+    bedtime_max_volume: Optional[int] = Field(alias="bedtimeMaxVolume")
+    bedtime_max_headphone_volume: Optional[int] = Field(alias="bedtimeMaxHeadphoneVolume")
     name: str
     tap_direction: str = Field(alias="tapDirection")
     timezone: Optional[str] = None

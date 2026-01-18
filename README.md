@@ -122,6 +122,10 @@ The `TonieAPIClient` provides access to the `TonieResources` class via the `toni
 -   `set_toniebox_name(household_id: str, toniebox_id: str, name: str) -> Toniebox`
 -   `set_accelerometer(household_id: str, toniebox_id: str, enabled: bool) -> Toniebox`
 -   `set_tap_direction(household_id: str, toniebox_id: str, direction: str) -> Toniebox`
+-   `set_lightring_brightness(household_id: str, toniebox_id: str, brightness: int) -> Toniebox`
+-   `set_bedtime_max_volume(household_id: str, toniebox_id: str, volume: int) -> Toniebox`
+-   `set_bedtime_headphone_volume(household_id: str, toniebox_id: str, volume: int) -> Toniebox`
+-   `set_bedtime_lightring_brightness(household_id: str, toniebox_id: str, brightness: int) -> Toniebox`
 
 All methods are asynchronous and should be awaited.
 

@@ -100,9 +100,9 @@ async def main():
             # Example: Set max volume for a Toniebox
             print("\nSet Max Volume (REST):")
             if tonieboxes:
-                first_toniebox = tonieboxes[0]
+                first_toniebox = tonieboxes[1]
                 # Test with a valid volume
-                valid_volume = 75
+                valid_volume = 71
                 try:
                     print(
                         f"Setting max volume for '{first_toniebox.name}' to {valid_volume}..."
@@ -116,169 +116,35 @@ async def main():
                 except ValueError as ve:
                     print(f"Error setting volume: {ve}")
 
-                # Test with an invalid volume
-                invalid_volume = 60
+                # Examples for tngSettings features
+                print("\nTesting tngSettings features (these will fail if not supported)...")
                 try:
-                    print(
-                        f"Attempting to set invalid max volume for '{first_toniebox.name}' to {invalid_volume}..."
+                    # Set lightring brightness
+                    updated_toniebox = await client.tonies.set_lightring_brightness(
+                        first_toniebox.household_id, first_toniebox.id, 50
                     )
-                    await client.tonies.set_max_volume(
-                        first_toniebox.household_id, first_toniebox.id, invalid_volume
-                    )
-                except ValueError as ve:
-                    print(f"Caught expected error for invalid volume: {ve}")
+                    print(f"Success! New lightring brightness: {updated_toniebox.lightring_brightness}")
 
-                # Example: Set LED brightness for a Toniebox
-                print("\nSet LED Brightness (REST):")
-                # Test with a valid LED level
-                valid_led_level = "dimmed"
-                try:
-                    print(
-                        f"Setting LED level for '{first_toniebox.name}' to '{valid_led_level}'..."
+                    # Set bedtime max volume
+                    updated_toniebox = await client.tonies.set_bedtime_max_volume(
+                        first_toniebox.household_id, first_toniebox.id, 30
                     )
-                    updated_toniebox = await client.tonies.set_led_brightness(
-                        first_toniebox.household_id, first_toniebox.id, valid_led_level
-                    )
-                    print(f"Success! New LED level: {updated_toniebox.led_level}")
-                except ValueError as ve:
-                    print(f"Error setting LED level: {ve}")
+                    print(f"Success! New bedtime max volume: {updated_toniebox.bedtime_max_volume}")
 
-                # Test with an invalid LED level
-                invalid_led_level = "bright"
-                try:
-                    print(
-                        f"Attempting to set invalid LED level for '{first_toniebox.name}' to '{invalid_led_level}'..."
+                    # Set bedtime headphone volume
+                    updated_toniebox = await client.tonies.set_bedtime_headphone_volume(
+                        first_toniebox.household_id, first_toniebox.id, 40
                     )
-                    await client.tonies.set_led_brightness(
-                        first_toniebox.household_id,
-                        first_toniebox.id,
-                        invalid_led_level,
-                    )
-                except ValueError as ve:
-                    print(f"Caught expected error for invalid LED level: {ve}")
+                    print(f"Success! New bedtime headphone volume: {updated_toniebox.bedtime_headphone_volume}")
 
-                # Example: Set max headphone volume for a Toniebox
-                print("\nSet Max Headphone Volume (REST):")
-                # Test with a valid headphone volume
-                valid_headphone_volume = 75
-                try:
-                    print(
-                        f"Setting max headphone volume for '{first_toniebox.name}' to {valid_headphone_volume}..."
+                    # Set bedtime lightring brightness
+                    updated_toniebox = await client.tonies.set_bedtime_lightring_brightness(
+                        first_toniebox.household_id, first_toniebox.id, 20
                     )
-                    updated_toniebox = await client.tonies.set_max_headphone_volume(
-                        first_toniebox.household_id,
-                        first_toniebox.id,
-                        valid_headphone_volume,
-                    )
-                    print(
-                        f"Success! New max headphone volume: {updated_toniebox.max_headphone_volume}"
-                    )
-                except ValueError as ve:
-                    print(f"Error setting headphone volume: {ve}")
+                    print(f"Success! New bedtime lightring brightness: {updated_toniebox.bedtime_lightring_brightness}")
 
-                # Test with an invalid headphone volume
-                invalid_headphone_volume = 60
-                try:
-                    print(
-                        f"Attempting to set invalid max headphone volume for '{first_toniebox.name}' to {invalid_headphone_volume}..."
-                    )
-                    await client.tonies.set_max_headphone_volume(
-                        first_toniebox.household_id,
-                        first_toniebox.id,
-                        invalid_headphone_volume,
-                    )
                 except ValueError as ve:
-                    print(f"Caught expected error for invalid headphone volume: {ve}")
-
-                # Example: Set Toniebox name
-                print("\nSet Toniebox Name (REST):")
-                # Test with a valid name
-                valid_name = "My Awesome Toniebox"
-                try:
-                    print(
-                        f"Setting name for '{first_toniebox.name}' to '{valid_name}'..."
-                    )
-                    updated_toniebox = await client.tonies.set_toniebox_name(
-                        first_toniebox.household_id, first_toniebox.id, valid_name
-                    )
-                    print(f"Success! New Toniebox name: {updated_toniebox.name}")
-                except ValueError as ve:
-                    print(f"Error setting Toniebox name: {ve}")
-
-                # Test with an invalid name (empty string)
-                invalid_name = ""
-                try:
-                    print(
-                        f"Attempting to set invalid name for '{first_toniebox.name}' to '{invalid_name}'..."
-                    )
-                    await client.tonies.set_toniebox_name(
-                        first_toniebox.household_id, first_toniebox.id, invalid_name
-                    )
-                except ValueError as ve:
-                    print(f"Caught expected error for invalid Toniebox name: {ve}")
-
-                # Example: Set accelerometer for a Toniebox
-                print("\nSet Accelerometer (REST):")
-                # Test enabling the accelerometer
-                try:
-                    print(
-                        f"Enabling accelerometer for '{first_toniebox.name}'..."
-                    )
-                    updated_toniebox = await client.tonies.set_accelerometer(
-                        first_toniebox.household_id, first_toniebox.id, True
-                    )
-                    print(
-                        f"Success! Accelerometer enabled: {updated_toniebox.accelerometer_enabled}"
-                    )
-                except ValueError as ve:
-                    print(f"Error setting accelerometer: {ve}")
-
-                # Test disabling the accelerometer
-                try:
-                    print(
-                        f"Disabling accelerometer for '{first_toniebox.name}'..."
-                    )
-                    updated_toniebox = await client.tonies.set_accelerometer(
-                        first_toniebox.household_id, first_toniebox.id, False
-                    )
-                    print(
-                        f"Success! Accelerometer enabled: {updated_toniebox.accelerometer_enabled}"
-                    )
-                except ValueError as ve:
-                    print(f"Error setting accelerometer: {ve}")
-
-                # Example: Set tap direction for a Toniebox
-                print("\nSet Tap Direction (REST):")
-                # Test with a valid direction
-                valid_direction = "left"
-                try:
-                    print(
-                        f"Setting tap direction for '{first_toniebox.name}' to '{valid_direction}'..."
-                    )
-                    updated_toniebox = await client.tonies.set_tap_direction(
-                        first_toniebox.household_id,
-                        first_toniebox.id,
-                        valid_direction,
-                    )
-                    print(
-                        f"Success! New tap direction: {updated_toniebox.tap_direction}"
-                    )
-                except ValueError as ve:
-                    print(f"Error setting tap direction: {ve}")
-
-                # Test with an invalid direction
-                invalid_direction = "up"
-                try:
-                    print(
-                        f"Attempting to set invalid tap direction for '{first_toniebox.name}' to '{invalid_direction}'..."
-                    )
-                    await client.tonies.set_tap_direction(
-                        first_toniebox.household_id,
-                        first_toniebox.id,
-                        invalid_direction,
-                    )
-                except ValueError as ve:
-                    print(f"Caught expected error for invalid tap direction: {ve}")
+                    print(f"Caught expected error for tngSettings feature: {ve}")
             else:
                 print("No Tonieboxes found to test setting max volume.")
 

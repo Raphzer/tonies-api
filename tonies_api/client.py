@@ -4,7 +4,7 @@ from typing import Self
 import httpx
 
 from .auth import TonieAuth
-from .tonies import TonieResources
+from .tonies import TonieResources, TonieWebSocket
 
 
 class TonieAPIClient:
@@ -21,6 +21,7 @@ class TonieAPIClient:
         self._session = httpx.AsyncClient()
         self.auth = TonieAuth(username, password, self._session)
         self.tonies = TonieResources(self._session)
+        self.ws = TonieWebSocket(self)
 
     async def __aenter__(self) -> Self:
         """Enter the async context manager."""

@@ -10,7 +10,7 @@ L'objectif est de permettre aux utilisateurs de gérer leurs Tonies, leurs Creat
 - **Modélisation des Données**: Utilisation de Pydantic pour la validation et la sérialisation des réponses de l'API.
 
 ## Tech Stack
-- **Language:** Python 3.10+
+- **Language:** Python 3.14+
 - **HTTP/GraphQL Client:** `httpx` (async)
 - **HTML Parsing:** `beautifulsoup4` (pour le flux d'authentification)
 - **Data Models:** `pydantic`

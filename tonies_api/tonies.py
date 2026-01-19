@@ -1,6 +1,11 @@
 import logging
-from typing import List
+import uuid
+from typing import Any, Callable, List, Optional
 import httpx
+import asyncio
+import json
+import logging
+import websockets
 
 from .const import (
     API_BASE_URL,
@@ -12,6 +17,7 @@ from .const import (
     GET_USER_DETAILS_QUERY,
     GRAPHQL_URL,
     USER_TONIES_OVERVIEW_QUERY,
+    WEBSOCKET_URL,
 )
 from .exceptions import TonieConnectionError
 from .models import (
@@ -642,3 +648,220 @@ class TonieResources:
             raise TonieConnectionError from exc
         except Exception as e:
             raise TonieConnectionError(f"Failed to set bedtime lightring brightness: {e}")
+
+
+class TonieWebSocket:
+    """Handles the WebSocket connection to the Tonies server."""
+
+    def __init__(self, client: Any) -> None:
+        """
+        Initialize the WebSocket handler.
+
+        Args:
+            client: The TonieAPIClient instance.
+        """
+        self._client = client
+        self._session = client._session
+        self._ws: Optional[websockets.WebSocketClientProtocol] = None
+        self._listen_task: Optional[asyncio.Task] = None
+        self._ping_task: Optional[asyncio.Task] = None
+        self._is_running = False
+        self._packet_id = 0
+        self._callbacks: list[Callable[[str, dict], Any]] = []
+
+    async def connect(self) -> None:
+        """
+        Establish the WebSocket connection and perform MQTT handshake.
+
+        Raises:
+            TonieConnectionError: If the connection or handshake fails.
+        """
+        auth_header = self._session.headers.get("Authorization")
+        if not auth_header:
+            raise TonieConnectionError("Missing Authorization header in session.")
+
+        token = auth_header.replace("Bearer ", "")
+        
+        # We need the User UUID for the MQTT username
+        user = await self._client.tonies.get_user_details()
+        client_id = f"{user.uuid}_com.tonies.app_2.153.2_{uuid.uuid4()}"
+
+        try:
+            log.debug(f"Connecting to {WEBSOCKET_URL} with subprotocol 'mqtt'")
+            
+            # FIX: In websockets v14+, use 'additional_headers' instead of 'extra_headers'
+            # and ensure subprotocols is correctly handled.
+            self._ws = await websockets.connect(
+                str(WEBSOCKET_URL), 
+                additional_headers={"Authorization": auth_header},
+                subprotocols=["mqtt"]
+            )
+            
+            # Construct and send the binary MQTT CONNECT packet
+            connect_packet = self._create_connect_packet(client_id, user.uuid, token)
+            await self._ws.send(connect_packet)
+
+            # Wait for MQTT CONNACK (0x20 0x02 0x00 0x00)
+            connack = await asyncio.wait_for(self._ws.recv(), timeout=10.0)
+            if not isinstance(connack, bytes) or connack[0] != 0x20 or connack[3] != 0x00:
+                rc = connack[3] if len(connack) > 3 else "Unknown"
+                raise TonieConnectionError(f"MQTT Handshake failed. Return code: {rc}")
+
+            self._is_running = True
+            log.info("Connected and authenticated to Tonies ICI server")
+
+            # Start background tasks
+            self._listen_task = asyncio.create_task(self._listen_loop())
+            self._ping_task = asyncio.create_task(self._ping_loop())
+            
+            # Automatically subscribe to all boxes in the account
+            await self._subscribe_to_resources()
+            
+        except Exception as e:
+            log.error(f"WebSocket connection error: {e}")
+            raise TonieConnectionError(f"WebSocket connection error: {e}")
+
+    async def _subscribe_to_resources(self) -> None:
+        """Fetch all boxes and subscribe to their real-time topics."""
+        try:
+            boxes = await self._client.tonies.get_households_boxes()
+            for box in boxes:
+                await self.subscribe_to_toniebox(box.mac_address)
+        except Exception as e:
+            log.error(f"Failed to auto-subscribe to boxes: {e}")
+
+    async def subscribe_to_toniebox(self, mac_address: str) -> None:
+        """
+        Subscribe to all relevant topics for a specific Toniebox.
+
+        Args:
+            mac_address: The MAC address of the Toniebox.
+        """
+        clean_mac = mac_address.lower().replace(":", "")
+        topics = [
+            f"external/toniebox/{clean_mac}/online-state",
+            f"external/toniebox/{clean_mac}/metrics/battery",
+            f"external/toniebox/{clean_mac}/attribute/placed_tonie",
+            f"external/toniebox/{clean_mac}/attribute/headphone_connected"
+        ]
+        await self.subscribe(topics)
+
+    async def subscribe(self, topics: list[str]) -> None:
+        """Send an MQTT SUBSCRIBE packet."""
+        if self._ws and self._is_running:
+            packet = self._create_subscribe_packet(topics)
+            await self._ws.send(packet)
+            log.debug(f"MQTT SUBSCRIBE sent: {topics}")
+        else:
+            log.error("Cannot subscribe: WebSocket not connected")
+
+    async def _listen_loop(self) -> None:
+        """Loop to listen for incoming binary MQTT messages."""
+        try:
+            while self._is_running and self._ws:
+                message = await self._ws.recv()
+                if isinstance(message, bytes):
+                    self._handle_binary_message(message)
+                else:
+                    # In case the server sends raw JSON (rare on ICI)
+                    self._handle_event({"topic": "raw/text", "payload": json.loads(message)})
+        except websockets.exceptions.ConnectionClosed:
+            log.warning("WebSocket connection closed by server")
+        except Exception as e:
+            log.error(f"Error in WebSocket listener: {e}")
+        finally:
+            self._is_running = False
+
+    async def _ping_loop(self) -> None:
+        """Periodic MQTT PINGREQ."""
+        try:
+            while self._is_running and self._ws:
+                await asyncio.sleep(60)
+                await self._ws.send(b"\xc0\x00")
+        except Exception:
+            pass
+
+    def _handle_binary_message(self, message: bytes) -> None:
+        """Handle binary MQTT packets."""
+        packet_type = message[0] & 0xF0
+        if packet_type == 0x30:  # PUBLISH
+            self._parse_publish_packet(message)
+        elif packet_type == 0xD0:  # PINGRESP
+            log.debug("MQTT PINGRESP received")
+
+    def _parse_publish_packet(self, packet: bytes) -> None:
+        """Parse MQTT PUBLISH packet."""
+        try:
+            pos = 1
+            while packet[pos] & 0x80: pos += 1
+            pos += 1 
+            topic_len = int.from_bytes(packet[pos:pos+2], byteorder="big")
+            pos += 2
+            topic = packet[pos:pos+topic_len].decode("utf-8")
+            pos += topic_len
+            payload_raw = packet[pos:]
+            json_start = payload_raw.find(b"{")
+            if json_start != -1:
+                data = json.loads(payload_raw[json_start:].decode("utf-8"))
+                self._handle_event({"topic": topic, "payload": data})
+        except Exception as e:
+            log.error(f"Failed to parse PUBLISH packet: {e}")
+
+    def register_callback(self, callback: Callable[[str, dict], Any]) -> Callable[[], None]:
+        """Register a callback to be notified of new events."""
+        self._callbacks.append(callback)
+        return lambda: self._callbacks.remove(callback)
+
+    def _handle_event(self, data: dict) -> None:
+        """Dispatch events to callbacks."""
+        topic = data.get("topic", "unknown")
+        payload = data.get("payload", data)
+        for callback in self._callbacks:
+            if asyncio.iscoroutinefunction(callback):
+                asyncio.create_task(callback(topic, payload))
+            else:
+                callback(topic, payload)
+
+    def _create_connect_packet(self, client_id: str, username: str, token: str) -> bytes:
+        """Create an MQTT CONNECT packet."""
+        def encode_str(s: str) -> bytes:
+            b = s.encode("utf-8")
+            return len(b).to_bytes(2, "big") + b
+        var_header = encode_str("MQIsdp") + b"\x03\xc2" + (60).to_bytes(2, "big")
+        payload = encode_str(client_id) + encode_str(username) + encode_str(token)
+        packet = b"\x10"
+        rem_len = len(var_header) + len(payload)
+        while True:
+            digit = rem_len % 128
+            rem_len //= 128
+            if rem_len > 0: digit |= 128
+            packet += digit.to_bytes(1, "big")
+            if rem_len <= 0: break
+        return packet + var_header + payload
+
+    def _create_subscribe_packet(self, topics: list[str]) -> bytes:
+        """Create an MQTT SUBSCRIBE packet."""
+        self._packet_id = (self._packet_id + 1) % 65535
+        var_header = self._packet_id.to_bytes(2, "big")
+        payload = b""
+        for topic in topics:
+            b = topic.encode("utf-8")
+            payload += len(b).to_bytes(2, "big") + b + b"\x00"
+        packet = b"\x82"
+        rem_len = len(var_header) + len(payload)
+        temp_len = rem_len
+        while True:
+            digit = temp_len % 128
+            temp_len //= 128
+            if temp_len > 0: digit |= 128
+            packet += digit.to_bytes(1, "big")
+            if temp_len <= 0: break
+        return packet + var_header + payload
+
+    async def disconnect(self) -> None:
+        """Close connection."""
+        self._is_running = False
+        if self._ping_task: self._ping_task.cancel()
+        if self._listen_task: self._listen_task.cancel()
+        if self._ws: await self._ws.close()
+

@@ -6,7 +6,7 @@ SCOPE = "openid profile email"
 REDIRECT_URI = "com.tonies.app:/oauthredirect"
 API_BASE_URL = "https://api.tonie.cloud/v2"
 GRAPHQL_URL = "https://api.tonie.cloud/v2/graphql"
-WEBSOCKET_URL = "https://ici.tonie.cloud/"
+WEBSOCKET_URL = "wss://ici.tonie.cloud/"
 
 OAUTH_URL = (
     f"{AUTH_BASE_URL}{AUTH_PATH}"

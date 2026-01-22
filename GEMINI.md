@@ -23,19 +23,22 @@ L'objectif est de permettre aux utilisateurs de gérer leurs Tonies, leurs Creat
 tonies_api/
 ├── .vscode/
 │   └── settings.json
-├── tonies_api/
-│   ├── __init__.py
-│   ├── client.py           # Client principal et orchestrateur
-│   ├── auth.py             # Gestion de l'authentification OAuth2
-│   ├── tonies.py           # Méthodes pour les requêtes API (GraphQL) et WebSocket
-│   ├── const.py            # Constantes (URLs, requêtes GraphQL)
-│   ├── exceptions.py       # Exceptions personnalisées
-│   └── models.py           # Modèles de données Pydantic
-├── demo_full.py            # Exemple d'utilisation complet (API REST/GraphQL)
-├── test_ws.py              # Exemple d'utilisation du WebSocket
+├── src/
+│   └── tonies_api/
+│       ├── __init__.py
+│       ├── client.py           # Client principal et orchestrateur
+│       ├── auth.py             # Gestion de l'authentification OAuth2
+│       ├── tonies.py           # Méthodes pour les requêtes API (GraphQL) et WebSocket
+│       ├── const.py            # Constantes (URLs, requêtes GraphQL)
+│       ├── exceptions.py       # Exceptions personnalisées
+│       └── models.py           # Modèles de données Pydantic
+├── example/
+│   ├── demo_full.py            # Exemple d'utilisation complet (API REST/GraphQL)
+│   └── test_ws.py              # Exemple d'utilisation du WebSocket
 ├── .env.example
 ├── .gitignore
 ├── README.md
+├── pyproject.toml
 └── requirements.txt
 ```
 

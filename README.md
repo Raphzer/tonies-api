@@ -32,7 +32,12 @@ You can install the library directly from the source:
 ```bash
 git clone https://github.com/your-username/tonies-api.git
 cd tonies-api
-pip install -r requirements.txt
+pip install .
+```
+
+For development (editable mode):
+```bash
+pip install -e .
 ```
 
 ## Usage

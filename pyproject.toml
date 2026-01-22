@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tonies-api"
+version = "0.1.0"
+authors = [
+  { name="Ton Nom", email="ton@email.com" },
+]
+description = "Asynchronous Python SDK for Tonies API and MQTT WebSocket"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.23.0",
+    "websockets>=14.0",
+    "pydantic>=2.0.0",
+    "beautifulsoup4>=4.11.0",
+    "python-dotenv>=1.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

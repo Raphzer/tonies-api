@@ -1,3 +1,9 @@
+from .client import TonieAPIClient
+from .exceptions import TonieConnectionError, TonieAuthError
+from .models import Toniebox, User, Household
+
+__all__ = ["TonieAPIClient", "TonieConnectionError", "TonieAuthError", "Toniebox", "User", "Household"]
+
 import logging
 import os
 import sys
@@ -20,11 +26,6 @@ if os.getenv("DEBUG") == "True":
 
     # Add the handler to the logger
     logger.addHandler(handler)
-
-    # Enable httpcore logging
-    httpcore_logger = logging.getLogger("httpcore")
-    httpcore_logger.setLevel(logging.DEBUG)
-    httpcore_logger.addHandler(handler)
 
     logging.getLogger(__name__).debug("DEBUG mode is enabled.")
 else:

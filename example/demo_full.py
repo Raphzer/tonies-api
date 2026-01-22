@@ -3,8 +3,8 @@ import os
 
 from dotenv import load_dotenv
 
-from tonies_api.client import TonieAPIClient
-from tonies_api.exceptions import TonieAuthError
+from tonies_api import TonieAPIClient
+from tonies_api import TonieAuthError
 
 
 async def main():

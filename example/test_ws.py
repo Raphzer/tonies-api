@@ -5,8 +5,8 @@ import uuid
 from dotenv import load_dotenv
 
 # Import de ton SDK
-from tonies_api.client import TonieAPIClient
-from tonies_api.exceptions import TonieConnectionError, TonieAuthError
+from tonies_api import TonieAPIClient
+from tonies_api import TonieConnectionError, TonieAuthError
 
 # Configuration du logging pour voir le détail du handshake MQTT et des trames
 logging.basicConfig(
@@ -20,17 +20,17 @@ async def event_callback(topic: str, data: dict):
     """
     Fonction appelée automatiquement à chaque réception de message MQTT.
     """
-    print(f"\n🔔 [NOUVEL ÉVÉNEMENT]")
-    print(f"📍 Topic : {topic}")
-    print(f"📦 Data  : {data}")
+    print(f"\n [NOUVEL ÉVÉNEMENT]")
+    print(f" Topic : {topic}")
+    print(f" Data  : {data}")
     
     # Exemple de traitement spécifique
     if "online-state" in topic:
-        print(f"ℹ️ État de la box : {data.get('onlineState')}")
+        print(f"ℹ État de la box : {data.get('onlineState')}")
     elif "placed_tonie" in topic:
-        print(f"🎵 Tonie détecté ! ID : {data.get('tonieId')}")
+        print(f" Tonie détecté ! ID : {data.get('tonieId')}")
     elif "battery" in topic:
-        print(f"🔋 Batterie : {data.get('battery')} %")
+        print(f" Batterie : {data.get('battery')} %")
 
 # --- MAIN ---
 async def main():

@@ -30,7 +30,7 @@ A Python library for interacting with the Tonies API. This library provides an a
 You can install the library directly from the source:
 
 ```bash
-git clone https://github.com/your-username/tonies-api.git
+git clone https://github.com/Raphzer/tonies-api.git
 cd tonies-api
 pip install .
 ```

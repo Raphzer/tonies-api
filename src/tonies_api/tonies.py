@@ -662,7 +662,7 @@ class TonieWebSocket:
         """
         self._client = client
         self._session = client._session
-        self._ws: Optional[websockets.WebSocketClientProtocol] = None
+        self._ws: Optional[websockets.WebSocketClientProtocol] = None # type: ignore
         self._listen_task: Optional[asyncio.Task] = None
         self._ping_task: Optional[asyncio.Task] = None
         self._is_running = False
@@ -694,15 +694,15 @@ class TonieWebSocket:
             self._ws = await websockets.connect(
                 str(WEBSOCKET_URL), 
                 additional_headers={"Authorization": auth_header},
-                subprotocols=["mqtt"]
+                subprotocols=["mqtt"] # type: ignore
             )
             
             # Construct and send the binary MQTT CONNECT packet
             connect_packet = self._create_connect_packet(client_id, user.uuid, token)
-            await self._ws.send(connect_packet)
+            await self._ws.send(connect_packet) # type: ignore
 
             # Wait for MQTT CONNACK (0x20 0x02 0x00 0x00)
-            connack = await asyncio.wait_for(self._ws.recv(), timeout=10.0)
+            connack = await asyncio.wait_for(self._ws.recv(), timeout=10.0) # type: ignore
             if not isinstance(connack, bytes) or connack[0] != 0x20 or connack[3] != 0x00:
                 rc = connack[3] if len(connack) > 3 else "Unknown"
                 raise TonieConnectionError(f"MQTT Handshake failed. Return code: {rc}")

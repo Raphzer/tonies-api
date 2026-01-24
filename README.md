@@ -100,6 +100,13 @@ async def main():
         # Connect and subscribe
         await client.ws.connect()
         
+        # get all box 
+        boxes = await client.tonies.get_households_boxes()
+
+        # subscribe to all compatible boxes (v2 gen)
+        for box in boxes:
+            await client.ws.subscribe_to_toniebox(box)
+
         # Keep alive
         await asyncio.sleep(60)
 
@@ -137,8 +144,28 @@ The `TonieAPIClient` provides access to `TonieResources` via `client.tonies` and
 ### WebSocket Methods (`client.ws`)
 
 -   `connect()`: Connects to the real-time server.
--   `subscribe_to_toniebox(mac_address)`: Subscribes to standard events for a box.
+-   `disconnect()`: Closes the WebSocket connection.
+-   `subscribe_to_toniebox(toniebox)`: Subscribes to all events for a box.
+-   `subscribe(topics: List[str])`: Manually subscribes to a list of MQTT topics.
 -   `register_callback(callback)`: Registers a function `async def callback(topic, payload)` to handle events.
+-   `send_toniebox_command(mac_address, command, payload)`: Sends a control command to the Toniebox (e.g., 'sleep', 'stl').
+-   `sleep_now(mac_address)`: Sends a command to immediately put the Toniebox to sleep.
+
+### Available MQTT Events
+
+When you subscribe to a Toniebox using `client.ws.subscribe_to_toniebox(mac_address)`, the client automatically subscribes to the wildcard topic `external/toniebox/{mac_address}/#`.
+
+Common events you might receive include:
+
+-   `.../online-state`: Updates when the box goes online or offline.
+-   `.../metrics/battery`: Battery level updates.
+-   `.../metrics/headphones`: Headphone connection status.
+-   `.../app-reply/bedtime-state`: Current status of bedtime mode.
+-   `.../changed-properties`: General property changes.
+-   `.../settings-applied`: Confirmation that settings have been applied.
+-   `.../setup/status`: Setup status updates.
+-   `.../playback/state`: Current Tonie on the box.
+
 
 ## License
 

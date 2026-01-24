@@ -726,42 +726,19 @@ class TonieWebSocket:
             log.error(f"WebSocket connection error: {e}")
             raise TonieConnectionError(f"WebSocket connection error: {e}")
 
-    async def _subscribe_to_resources(self) -> None:
-        """Fetch all boxes and subscribe to their real-time topics."""
-        try:
-            boxes = await self._client.tonies.get_households_boxes()
-            for box in boxes:
-                if await self._client.tonies.is_tng_toniebox(box.id):
-                    await self.subscribe_to_toniebox(box.mac_address)
-                else:
-                    log.error(f"Websocket connection not available for this box {box.name} {box.mac_address}")
-        except Exception as e:
-            log.error(f"Failed to auto-subscribe to boxes: {e}")
-
 
     async def subscribe_to_toniebox(self, box) -> None:
         """
         Subscribe to all relevant topics for a specific Toniebox.
 
         Args:
-            mac_address: The MAC address of the Toniebox.
+            box: Toniebox object.
         """
         try:
             if not await self._client.tonies.is_tng_toniebox(box):
                 raise 
-            clean_mac = box.mac_address
             topics = [
-                f"external/toniebox/{clean_mac}/app-reply/bedtime-state",
-                f"external/toniebox/{clean_mac}/metrics/headphones",
-                f"external/toniebox/{clean_mac}/metrics/battery",
-                f"external/toniebox/{clean_mac}/app-reply/alarm",
-                f"external/toniebox/{clean_mac}/online-state",
-                f"external/toniebox/{clean_mac}/changed-properties",
-                f"external/toniebox/{clean_mac}/settings-applied",
-                f"external/toniebox/{clean_mac}/setup/status",
-                f"external/toniebox/{clean_mac}/app-control/stl",
-                f"external/toniebox/{clean_mac}/app-control/sleep",
-                f"external/toniebox/{clean_mac}/app-control/alarm-preview"
+                f"external/toniebox/{box.mac_address}/#"
             ]
             await self.subscribe(topics)
         except Exception as e:

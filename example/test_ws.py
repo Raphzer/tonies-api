@@ -27,10 +27,10 @@ async def event_callback(topic: str, data: dict):
     # Exemple de traitement spécifique
     if "online-state" in topic:
         print(f"ℹ État de la box : {data.get('onlineState')}")
-    elif "placed_tonie" in topic:
-        print(f" Tonie détecté ! ID : {data.get('tonieId')}")
+    elif "playback/state" in topic:
+        print(f" Tonie détecté ! ID : {data.get('tonie')}")
     elif "battery" in topic:
-        print(f" Batterie : {data.get('battery')} %")
+        print(f" Batterie : {data.get('percent')} %")
 
 # --- MAIN ---
 async def main():

@@ -65,25 +65,10 @@ async def main():
             # On utilise la Mac Address car les topics ICI sont basés dessus.
             log.info("Récupération de la liste des Tonieboxes...")
             boxes = await client.tonies.get_households_boxes()
-            
-            if not boxes:
-                log.warning("Aucune Toniebox trouvée sur ce compte.")
-            else:
-                for box in boxes:
-                    log.info(f"Abonnement aux événements de la box : {box.name} (MAC: {box.mac_address})")
-                    # On s'abonne aux topics standards + ceux de ton test manuel
-                    await client.ws.subscribe_to_toniebox(box.mac_address)
-                    
-                    # Test spécifique pour les topics que tu as fournis en Base64
-                    manual_topics = [
-                        f"external/toniebox/{box.mac_address}/app-reply/bedtime-state",
-                        f"external/toniebox/{box.mac_address}/metrics/headphones",
-                        f"external/toniebox/{box.mac_address}/changed-properties"
-                    ]
-                    await client.ws.subscribe(manual_topics)
+            for box in boxes:
+                await client.ws.subscribe_to_toniebox(box)
 
             log.info("--- ÉCOUTE ACTIVE (60 secondes) ---")
-            log.info("Posez un Tonie sur la box, retirez-le, ou branchez un casque pour voir les logs.")
             
             # On maintient le script en vie. Le ping_loop en arrière-plan gère le Keep-Alive.
             await asyncio.sleep(60)

@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "tonies-api"
 version = "0.1.0"
 authors = [
-  { name="Ton Nom", email="ton@email.com" },
+  { name="Raphael WALTER", email="contact@raphael-walter.fr" },
 ]
 description = "Asynchronous Python SDK for Tonies API and MQTT WebSocket"
 readme = "README.md"

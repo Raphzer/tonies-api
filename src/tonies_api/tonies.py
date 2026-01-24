@@ -649,6 +649,14 @@ class TonieResources:
         except Exception as e:
             raise TonieConnectionError(f"Failed to set bedtime lightring brightness: {e}")
 
+    async def is_tng_toniebox(self, toniebox) -> bool:
+        if "tngSettings" in toniebox.features:
+            return True
+        else:
+            return False
+
+
+
 
 class TonieWebSocket:
     """Handles the WebSocket connection to the Tonies server."""
@@ -714,9 +722,6 @@ class TonieWebSocket:
             self._listen_task = asyncio.create_task(self._listen_loop())
             self._ping_task = asyncio.create_task(self._ping_loop())
             
-            # Automatically subscribe to all boxes in the account
-            await self._subscribe_to_resources()
-            
         except Exception as e:
             log.error(f"WebSocket connection error: {e}")
             raise TonieConnectionError(f"WebSocket connection error: {e}")
@@ -726,25 +731,42 @@ class TonieWebSocket:
         try:
             boxes = await self._client.tonies.get_households_boxes()
             for box in boxes:
-                await self.subscribe_to_toniebox(box.mac_address)
+                if await self._client.tonies.is_tng_toniebox(box.id):
+                    await self.subscribe_to_toniebox(box.mac_address)
+                else:
+                    log.error(f"Websocket connection not available for this box {box.name} {box.mac_address}")
         except Exception as e:
             log.error(f"Failed to auto-subscribe to boxes: {e}")
 
-    async def subscribe_to_toniebox(self, mac_address: str) -> None:
+
+    async def subscribe_to_toniebox(self, box) -> None:
         """
         Subscribe to all relevant topics for a specific Toniebox.
 
         Args:
             mac_address: The MAC address of the Toniebox.
         """
-        clean_mac = mac_address.lower().replace(":", "")
-        topics = [
-            f"external/toniebox/{clean_mac}/online-state",
-            f"external/toniebox/{clean_mac}/metrics/battery",
-            f"external/toniebox/{clean_mac}/attribute/placed_tonie",
-            f"external/toniebox/{clean_mac}/attribute/headphone_connected"
-        ]
-        await self.subscribe(topics)
+        try:
+            if not await self._client.tonies.is_tng_toniebox(box):
+                raise 
+            clean_mac = box.mac_address
+            topics = [
+                f"external/toniebox/{clean_mac}/app-reply/bedtime-state",
+                f"external/toniebox/{clean_mac}/metrics/headphones",
+                f"external/toniebox/{clean_mac}/metrics/battery",
+                f"external/toniebox/{clean_mac}/app-reply/alarm",
+                f"external/toniebox/{clean_mac}/online-state",
+                f"external/toniebox/{clean_mac}/changed-properties",
+                f"external/toniebox/{clean_mac}/settings-applied",
+                f"external/toniebox/{clean_mac}/setup/status",
+                f"external/toniebox/{clean_mac}/app-control/stl",
+                f"external/toniebox/{clean_mac}/app-control/sleep",
+                f"external/toniebox/{clean_mac}/app-control/alarm-preview"
+            ]
+            await self.subscribe(topics)
+        except Exception as e:
+            log.error(f"Websocket not available for this box{box.name} {box.mac_address}")
+                      
 
     async def subscribe(self, topics: list[str]) -> None:
         """Send an MQTT SUBSCRIBE packet."""
@@ -857,6 +879,79 @@ class TonieWebSocket:
             packet += digit.to_bytes(1, "big")
             if temp_len <= 0: break
         return packet + var_header + payload
+
+    async def send_toniebox_command(self, mac_address: str, command_type: str, payload: Optional[dict] = None) -> None:
+        """
+        Send a command to a specific Toniebox via MQTT Publish (QoS 1).
+
+        Args:
+            mac_address: The MAC address of the Toniebox.
+            command_type: The command endpoint (e.g., 'stl', 'sleep', 'sync').
+            payload: Optional dictionary containing command parameters. Defaults to empty {}.
+        """
+        if not self._ws or not self._is_running:
+            log.error("Cannot send command: WebSocket not connected")
+            return
+
+        # Si aucun payload n'est fourni, on envoie un dictionnaire vide
+        if payload is None:
+            payload = {}
+
+        clean_mac = mac_address.lower().replace(":", "")
+        topic = f"external/toniebox/{clean_mac}/app-control/{command_type}"
+        
+        packet = self._create_publish_packet(topic, payload)
+        await self._ws.send(packet) # type: ignore
+        log.debug(f"MQTT PUBLISH (Command) sent to {topic}: {payload}")
+
+    def _create_publish_packet(self, topic: str, payload_dict: dict) -> bytes:
+        """
+        Create a binary MQTT 3.1 PUBLISH packet with QoS 1.
+
+        Args:
+            topic: The MQTT topic.
+            payload_dict: The data to be sent as JSON.
+
+        Returns:
+            The binary PUBLISH packet.
+        """
+        self._packet_id = (self._packet_id + 1) % 65535
+        
+        # 1. Encode Topic
+        topic_bytes = topic.encode("utf-8")
+        variable_header = len(topic_bytes).to_bytes(2, "big") + topic_bytes
+        
+        # 2. Add Packet Identifier (indispensable pour QoS 1)
+        variable_header += self._packet_id.to_bytes(2, "big")
+        
+        # 3. Encode Payload (JSON compact)
+        # On utilise separators pour éviter les espaces inutiles et coller au format Tonies
+        payload_bytes = json.dumps(payload_dict, separators=(',', ':')).encode("utf-8")
+        
+        remaining_length = len(variable_header) + len(payload_bytes)
+        
+        # Fixed header: 0x32 = PUBLISH, QoS 1
+        packet = bytearray([0x32])
+        
+        # Encode remaining length (MQTT multi-byte integer)
+        temp_len = remaining_length
+        while True:
+            digit = temp_len % 128
+            temp_len //= 128
+            if temp_len > 0:
+                digit |= 128
+            packet.append(digit)
+            if temp_len <= 0:
+                break
+                
+        return bytes(packet) + variable_header + payload_bytes
+
+    async def sleep_now(self, mac_address:str):
+        clean_mac = mac_address.lower().replace(":","")
+        payload = {"state":"on","duration":300}
+        await self.send_toniebox_command(clean_mac,"stl", payload)
+
+        await self.send_toniebox_command(clean_mac,"sleep")
 
     async def disconnect(self) -> None:
         """Close connection."""

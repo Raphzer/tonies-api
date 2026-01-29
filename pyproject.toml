@@ -19,5 +19,13 @@ dependencies = [
     "python-dotenv>=1.0.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "flake8",
+]
+
 [tool.setuptools.packages.find]
 where = ["src"]
+
+

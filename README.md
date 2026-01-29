@@ -23,6 +23,7 @@ A Python library for interacting with the Tonies API. This library provides an a
     -   Battery levels
     -   Tonie placement detection
     -   Headphone connection status
+    -   Bedtime configuration 
 -   **Type Safety**: Comprehensive Pydantic models for all data structures.
 
 ## Installation

@@ -1,5 +1,5 @@
 from typing import List, Optional, Union
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class Toniebox(BaseModel):
@@ -29,9 +29,9 @@ class Toniebox(BaseModel):
     settings_applied: bool = Field(alias="settingsApplied")
     mac_address: str = Field(alias="macAddress")
     bedtime_schedules: List[BetTimeSchedules] = Field(alias="bedtimeSchedules") 
+    model_config = ConfigDict(populate_by_name=True)
 
-    class Config:
-        populate_by_name = True
+
 
 
 class BetTimeSchedules(BaseModel):
@@ -82,8 +82,8 @@ class User(BaseModel):
     region: str
     can_buy_tunes: bool = Field(alias="canBuyTunes")
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
+
 
 
 class Household(BaseModel):
@@ -96,9 +96,8 @@ class Household(BaseModel):
     owner_name: str = Field(alias="ownerName")
     access: str
     foreign_creative_tonie_content: bool = Field(alias="foreignCreativeTonieContent")
+    model_config = ConfigDict(populate_by_name=True)
 
-    class Config:
-        populate_by_name = True
 
 
 # Models for UserToniesOverview
@@ -119,27 +118,24 @@ class Item(BaseModel):
     tonie_shop_url: Optional[str] = Field(alias="tonieShopUrl")
     thumbnail: Optional[str]
     sales_id: Optional[str] = Field(alias="salesId")
+    model_config = ConfigDict(populate_by_name=True)
 
-    class Config:
-        populate_by_name = True
 
 
 class AssignedTonie(BaseModel):
     id: str
     image_url: str = Field(alias="imageUrl")
     title: str
+    model_config = ConfigDict(populate_by_name=True)
 
-    class Config:
-        populate_by_name = True
 
 
 class Tune(BaseModel):
     id: str
     assigned_tonies: List[AssignedTonie] = Field(alias="assignedTonies")
     item: Item
+    model_config = ConfigDict(populate_by_name=True)
 
-    class Config:
-        populate_by_name = True
 
 
 class FreshnessCheck(BaseModel):
@@ -195,8 +191,8 @@ class CreativeTonie(BaseModel):
     tune: Optional[Tune] = None
 
 
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)
+
 
 
 class Disc(BaseModel):
@@ -208,9 +204,8 @@ class Disc(BaseModel):
     household_id: str = Field(alias="householdId")
     cover_image_url: str = Field(alias="coverImageUrl")
 
+    model_config = ConfigDict(populate_by_name=True)
 
-    class Config:
-        populate_by_name = True
 
 
 class Group(BaseModel):
@@ -238,9 +233,8 @@ class ContentTonie(BaseModel):
     tune: Optional[Tune]
     freshness_check: FreshnessCheck = Field(alias="freshnessCheck")
 
+    model_config = ConfigDict(populate_by_name=True)
 
-    class Config:
-        populate_by_name = True
 
 
 class HouseholdWithTonies(Household):
@@ -257,9 +251,8 @@ class TonieboxInChild(BaseModel):
     features: List[str]
     front_image_url: str = Field(alias="frontImageUrl")
 
+    model_config = ConfigDict(populate_by_name=True)
 
-    class Config:
-        populate_by_name = True
 
 
 class Child(BaseModel):
@@ -272,9 +265,8 @@ class Child(BaseModel):
     taxonomies_preferences: Optional[List[str]] = Field(alias="taxonomiesPreferences")
     taxonomies_avoid: Optional[List[str]] = Field(alias="taxonomiesAvoid")
 
+    model_config = ConfigDict(populate_by_name=True)
 
-    class Config:
-        populate_by_name = True
 
 
 # Models for GetHouseholdMembers
@@ -284,18 +276,16 @@ class CreativeTonieInPermission(BaseModel):
     image_url: str = Field(alias="imageUrl")
     name: str
 
+    model_config = ConfigDict(populate_by_name=True)
 
-    class Config:
-        populate_by_name = True
 
 
 class Permission(BaseModel):
     creative_tonie: CreativeTonieInPermission = Field(alias="creativeTonie")
     permission: str
 
+    model_config = ConfigDict(populate_by_name=True)
 
-    class Config:
-        populate_by_name = True
 
 
 class Member(BaseModel):
@@ -311,9 +301,8 @@ class Member(BaseModel):
     profile_image: Optional[str] = Field(alias="profileImage")
     permissions: List[Permission]
 
+    model_config = ConfigDict(populate_by_name=True)
 
-    class Config:
-        populate_by_name = True
 
 
 class Invitation(BaseModel):
@@ -360,9 +349,8 @@ class MyTuneAssignedTonie(BaseModel):
     cover_url: str = Field(alias="coverUrl")
     title: str
 
+    model_config = ConfigDict(populate_by_name=True)
 
-    class Config:
-        populate_by_name = True
 
 
 class MyTune(BaseModel):
@@ -370,9 +358,8 @@ class MyTune(BaseModel):
     assign_count_remaining: int = Field(alias="assignCountRemaining")
     assigned_tonies: List[MyTuneAssignedTonie] = Field(alias="assignedTonies")
 
+    model_config = ConfigDict(populate_by_name=True)
 
-    class Config:
-        populate_by_name = True
 
 
 class OwnedTune(BaseModel):
@@ -389,10 +376,8 @@ class OwnedTune(BaseModel):
     language_unicode: str = Field(alias="languageUnicode")
     min_age: int = Field(alias="minAge")
     my_tune: MyTune = Field(alias="myTune")
+    model_config = ConfigDict(populate_by_name=True)
 
-
-    class Config:
-        populate_by_name = True
 
 
 class ContentTonieDetailsChapter(BaseModel):
@@ -429,6 +414,4 @@ class ContentTonieDetails(BaseModel):
     series: ContentTonieDetailsSeries
     owned_tunes: List[OwnedTune] = Field(alias="ownedTunes")
 
-
-    class Config:
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True)

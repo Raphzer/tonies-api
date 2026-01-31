@@ -19,6 +19,15 @@ dependencies = [
     "python-dotenv>=1.0.0",
 ]
 
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+
+[project.urls]
+Homepage = "https://github.com/Raphzer/tonies-api"
+Issues = "https://github.com/Raphzer/tonies-api/issues"
+
+
+
 [project.optional-dependencies]
 dev = [
     "flake8",

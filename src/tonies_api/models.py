@@ -1,6 +1,7 @@
 from typing import List, Optional, Union
 from pydantic import BaseModel, Field, ConfigDict
 
+from __future__ import annotations
 
 class Toniebox(BaseModel):
     """

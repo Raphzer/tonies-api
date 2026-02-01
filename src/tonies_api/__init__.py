@@ -4,6 +4,8 @@ from .models import Toniebox, User, Household
 
 __all__ = ["TonieAPIClient", "TonieConnectionError", "TonieAuthError", "Toniebox", "User", "Household"]
 
+__version__ = "0.1.1"
+
 import logging
 import os
 import sys

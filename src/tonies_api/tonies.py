@@ -1,3 +1,4 @@
+import time
 import uuid
 from typing import Any, Callable, List, Optional
 import httpx
@@ -43,6 +44,12 @@ class TonieResources:
             session: An httpx.AsyncClient session.
         """
         self._session = session
+        # Cache for _get_toniebox: avoids a full GraphQL round-trip on every
+        # set_* call.  Entries expire after _TONIEBOX_CACHE_TTL seconds so
+        # stale data (e.g. a renamed box) is never kept for long.
+        self._toniebox_cache: dict[str, tuple[Toniebox, float]] = {}
+
+    _TONIEBOX_CACHE_TTL = 30.0  # seconds
 
     async def get_households(self) -> List[Household]:
         """
@@ -256,7 +263,8 @@ class TonieResources:
         """
         Get a specific Toniebox by its ID.
 
-        Note: This is inefficient as it fetches all tonieboxes.
+        Results are cached for ``_TONIEBOX_CACHE_TTL`` seconds to avoid
+        issuing a full GraphQL request on every ``set_*`` call.
 
         Args:
             toniebox_id: The ID of the Toniebox.
@@ -267,11 +275,23 @@ class TonieResources:
         Raises:
             ValueError: If the Toniebox is not found.
         """
-        tonieboxes = await self.get_households_boxes()
-        for toniebox in tonieboxes:
-            if toniebox.id == toniebox_id:
+        cached = self._toniebox_cache.get(toniebox_id)
+        if cached is not None:
+            toniebox, expires_at = cached
+            if time.monotonic() < expires_at:
                 return toniebox
-        raise ValueError(f"Toniebox with ID {toniebox_id} not found.")
+
+        tonieboxes = await self.get_households_boxes()
+        expires_at = time.monotonic() + self._TONIEBOX_CACHE_TTL
+        for toniebox in tonieboxes:
+            self._toniebox_cache[toniebox.id] = (toniebox, expires_at)
+            if toniebox.id == toniebox_id:
+                found = toniebox
+
+        try:
+            return found
+        except UnboundLocalError:
+            raise ValueError(f"Toniebox with ID {toniebox_id} not found.")
 
     async def set_max_volume(
         self, household_id: str, toniebox_id: str, max_volume: int
@@ -292,7 +312,7 @@ class TonieResources:
             TonieConnectionError: If there is a connection error.
         """
         toniebox = await self._get_toniebox(toniebox_id)
-        if "tngSettings" in toniebox.features:
+        if toniebox.is_tng:
             if not 25 <= max_volume <= 100:
                 raise ValueError("Max volume must be between 25 and 100 for this Toniebox.")
         else:
@@ -332,7 +352,7 @@ class TonieResources:
             TonieConnectionError: If there is a connection error.
         """
         toniebox = await self._get_toniebox(toniebox_id)
-        if "tngSettings" in toniebox.features:
+        if toniebox.is_tng:
             if not 25 <= max_headphone_volume <= 100:
                 raise ValueError("Max headphone volume must be between 25 and 100 for this Toniebox.")
         else:
@@ -512,7 +532,7 @@ class TonieResources:
             TonieConnectionError: If there is a connection error.
         """
         toniebox = await self._get_toniebox(toniebox_id)
-        if "tngSettings" not in toniebox.features:
+        if not toniebox.is_tng:
             raise ValueError("This Toniebox does not support setting lightring brightness.")
         if not 0 <= brightness <= 100:
             raise ValueError("Brightness must be between 0 and 100.")
@@ -551,7 +571,7 @@ class TonieResources:
             TonieConnectionError: If there is a connection error.
         """
         toniebox = await self._get_toniebox(toniebox_id)
-        if "tngSettings" not in toniebox.features:
+        if not toniebox.is_tng:
             raise ValueError("This Toniebox does not support setting bedtime max volume.")
         if not 0 <= volume <= 100:
             raise ValueError("Bedtime max volume must be between 0 and 100.")
@@ -590,7 +610,7 @@ class TonieResources:
             TonieConnectionError: If there is a connection error.
         """
         toniebox = await self._get_toniebox(toniebox_id)
-        if "tngSettings" not in toniebox.features:
+        if not toniebox.is_tng:
             raise ValueError("This Toniebox does not support setting bedtime headphone volume.")
         if not 25 <= volume <= 100:
             raise ValueError("Bedtime headphone volume must be between 25 and 100.")
@@ -629,7 +649,7 @@ class TonieResources:
             TonieConnectionError: If there is a connection error.
         """
         toniebox = await self._get_toniebox(toniebox_id)
-        if "tngSettings" not in toniebox.features:
+        if not toniebox.is_tng:
             raise ValueError("This Toniebox does not support setting bedtime lightring brightness.")
         if not 0 <= brightness <= 100:
             raise ValueError("Bedtime lightring brightness must be between 0 and 100.")

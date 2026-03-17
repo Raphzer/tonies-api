@@ -1,8 +1,8 @@
 from .client import TonieAPIClient
 from .exceptions import TonieConnectionError, TonieAuthError
-from .models import Toniebox, User, Household
+from .models import Toniebox, User, Household, BedtimeSchedules
 
-__all__ = ["TonieAPIClient", "TonieConnectionError", "TonieAuthError", "Toniebox", "User", "Household"]
+__all__ = ["TonieAPIClient", "TonieConnectionError", "TonieAuthError", "Toniebox", "User", "Household", "BedtimeSchedules"]
 
 __version__ = "0.1.2"
 

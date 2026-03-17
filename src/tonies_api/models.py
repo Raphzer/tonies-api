@@ -30,13 +30,13 @@ class Toniebox(BaseModel):
     features: List[str]
     settings_applied: bool = Field(alias="settingsApplied")
     mac_address: str = Field(alias="macAddress")
-    bedtime_schedules: List[BetTimeSchedules] = Field(alias="bedtimeSchedules") 
+    bedtime_schedules: List[BedTimeSchedules] = Field(alias="bedtimeSchedules") 
     model_config = ConfigDict(populate_by_name=True)
 
 
 
 
-class BetTimeSchedules(BaseModel):
+class BedTimeSchedules(BaseModel):
     id: str
     name: str
     enabled: bool

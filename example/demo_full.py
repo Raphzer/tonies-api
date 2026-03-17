@@ -101,7 +101,7 @@ async def main():
             print("\nSet Max Volume (REST):")
             if tonieboxes:
                 first_toniebox = tonieboxes[0]
-                print(f"Betimeschedules: {first_toniebox.bedtime_schedules}")
+                print(f"Bedtimeschedules: {first_toniebox.bedtime_schedules}")
  
     except TonieAuthError as e:
         print(f"Authentication failed: {e}")

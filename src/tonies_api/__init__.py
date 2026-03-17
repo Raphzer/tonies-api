@@ -1,14 +1,14 @@
 from .client import TonieAPIClient
 from .exceptions import TonieConnectionError, TonieAuthError
 from .models import Toniebox, User, Household, BedtimeSchedules
-
-__all__ = ["TonieAPIClient", "TonieConnectionError", "TonieAuthError", "Toniebox", "User", "Household", "BedtimeSchedules"]
-
-__version__ = "0.1.2"
-
 import logging
 import os
 import sys
+
+__all__ = ["TonieAPIClient", "TonieConnectionError", "TonieAuthError", "Toniebox", "User", "Household", "BedtimeSchedules"]
+
+__version__ = "0.1.3"
+
 
 # Configure logging
 if os.getenv("DEBUG") == "True":

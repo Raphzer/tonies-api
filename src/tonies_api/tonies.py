@@ -648,13 +648,6 @@ class TonieResources:
         except Exception as e:
             raise TonieConnectionError(f"Failed to set bedtime lightring brightness: {e}")
 
-    async def is_tng_toniebox(self, toniebox) -> bool:
-        if "tngSettings" in toniebox.features:
-            return True
-        else:
-            return False
-
-
 
 
 
@@ -748,7 +741,7 @@ class TonieWebSocket:
         Returns:
             True if the subscription was sent, False if the box is not compatible.
         """
-        if "tngSettings" not in box.features:
+        if not box.is_tng:
             log.warning(
                 "Skipping WebSocket subscription for '%s' (%s): "
                 "box does not support real-time events.",
@@ -1095,3 +1088,4 @@ class TonieWebSocket:
             if temp_len <= 0:
                 break
         return bytes(packet) + variable_header + payload_bytes
+        

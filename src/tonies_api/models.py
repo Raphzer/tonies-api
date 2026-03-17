@@ -30,13 +30,18 @@ class Toniebox(BaseModel):
     features: List[str]
     settings_applied: bool = Field(alias="settingsApplied")
     mac_address: str = Field(alias="macAddress")
-    bedtime_schedules: List[BedTimeSchedules] = Field(alias="bedtimeSchedules") 
+    bedtime_schedules: List[BedtimeSchedules] = Field(alias="bedtimeSchedules")
     model_config = ConfigDict(populate_by_name=True)
 
+    @property
+    def is_tng(self) -> bool:
+        """Return True if this Toniebox supports TNG (next-gen) features such as WebSocket events."""
+        return "tngSettings" in self.features
 
 
 
-class BedTimeSchedules(BaseModel):
+
+class BedtimeSchedules(BaseModel):
     id: str
     name: str
     enabled: bool
@@ -417,3 +422,4 @@ class ContentTonieDetails(BaseModel):
     owned_tunes: List[OwnedTune] = Field(alias="ownedTunes")
 
     model_config = ConfigDict(populate_by_name=True)
+    

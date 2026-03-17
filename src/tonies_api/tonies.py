@@ -742,7 +742,7 @@ class TonieWebSocket:
             ]
             await self.subscribe(topics)
         except Exception as e:
-            log.error(f"Websocket not available for this box{box.name} {box.mac_address}")
+            raise TonieConnectionError(f"Websocket not available for this box{box.name} {box.mac_address}")
                       
 
     async def subscribe(self, topics: list[str]) -> None:

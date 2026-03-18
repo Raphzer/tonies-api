@@ -17,20 +17,20 @@ class Toniebox(BaseModel):
     front_image_url: str = Field(alias="frontImageUrl")
     item_id: str = Field(alias="itemId")
     led_level: str = Field(alias="ledLevel")
-    lightring_brightness: Optional[int] = Field(alias="lightringBrightness")
-    bedtime_lightring_brightness: Optional[int] = Field(alias="bedtimeLightringBrightness")
-    bedtime_lightring_color: Optional[str] = Field(alias="bedtimeLightringColor")    
+    lightring_brightness: Optional[int] = Field(None, alias="lightringBrightness")
+    bedtime_lightring_brightness: Optional[int] = Field(None, alias="bedtimeLightringBrightness")
+    bedtime_lightring_color: Optional[str] = Field(None, alias="bedtimeLightringColor")
     max_headphone_volume: int = Field(alias="maxHeadphoneVolume")
     max_volume: int = Field(alias="maxVolume")
-    bedtime_max_volume: Optional[int] = Field(alias="bedtimeMaxVolume")
-    bedtime_max_headphone_volume: Optional[int] = Field(alias="bedtimeMaxHeadphoneVolume")
+    bedtime_max_volume: Optional[int] = Field(None, alias="bedtimeMaxVolume")
+    bedtime_max_headphone_volume: Optional[int] = Field(None, alias="bedtimeMaxHeadphoneVolume")
     name: str
     tap_direction: str = Field(alias="tapDirection")
     timezone: Optional[str] = None
     features: List[str]
     settings_applied: bool = Field(alias="settingsApplied")
     mac_address: str = Field(alias="macAddress")
-    bedtime_schedules: List[BedtimeSchedules] = Field(alias="bedtimeSchedules")
+    bedtime_schedules: List[BedtimeSchedules] = Field(default_factory=list, alias="bedtimeSchedules")
     model_config = ConfigDict(populate_by_name=True)
 
     @property

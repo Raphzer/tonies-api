@@ -11,6 +11,12 @@ All notable changes to this project will be documented in this file.
 - OAuth2 authentication flow with Keycloak support.
 - Pydantic models for data validation.
 
+## [0.1.4] - 2026-03-18
+
+### Fixed
+- Fixed `Toniebox` Pydantic v2 model: `Optional` fields (`lightring_brightness`, `bedtime_lightring_brightness`, `bedtime_lightring_color`, `bedtime_max_volume`, `bedtime_max_headphone_volume`) were missing `default=None`, making them implicitly required and causing `ValidationError` when parsing partial responses from PATCH endpoints (e.g. `set_max_volume`, `set_max_headphone_volume`).
+- Fixed `bedtime_schedules` field missing `default_factory=list`, causing the same `ValidationError` on Classic boxes that don't return bedtime data.
+
 ## [0.1.3] - 2026-03-18
 
 ### Added
